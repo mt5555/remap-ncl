@@ -3,6 +3,12 @@
 ; 
 ; Apply SCRIP format mapping file to regrid a list of netcdf files
 ;
+; latest version available on github:  
+;    git@github.com:mt5555/remap-ncl.git
+; download directly via:
+;    wget https://raw.github.com/mt5555/remap-ncl/master/regridfile.ncl
+;
+;
 ; based on regridclimo.ncl, John Truesdale, May 2012
 ; Mark Taylor, April 2014:  user specified map file, process wildcard filenames
 ; Mark Taylor, November 2014:  support remapping of lat/lon input files
