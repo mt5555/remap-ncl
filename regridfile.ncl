@@ -85,7 +85,7 @@ end if
 ; set files to remap.  wildcards are ok
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 if (isvar("srcfile")) then    
-  srcFileName = srcfile
+  srcFileName = systemfunc("ls "+srcfile)
 else
   ;srcFileName = systemfunc("ls *climo.nc")
   ;srcFileName = systemfunc("ls h0-tavg.nc")
@@ -203,6 +203,7 @@ do fk=0,num_files-1
     if(isfilepresent(dstFileName)) then
       system("rm "+dstFileName)
     end if
+    setfileoption("nc","Format","LargeFile") 
     dst_file=addfile(dstFileName,"c")
 
 
@@ -368,6 +369,7 @@ do fk=0,num_files-1
 ; explicitly exit file definition mode. **NOT REQUIRED in NCL**
 ;===================================================================
     setfileoption(dst_file,"DefineMode",False)
+
         
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;        Write the basic and regridded data values to the predefined structures
