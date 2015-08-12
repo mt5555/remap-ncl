@@ -163,13 +163,13 @@ lon&lon   =  lon
 mlon      = dimsizes(lon)            ; same as dst_mlon
 print("interpolating to output grid of size: "+nlat+" x "+mlon)
 print("dst_lat range: "+dst_lat(0)+" "+dst_lat(nlat-1))
-
+print("dst_lon range: "+dst_lon(0)+" "+dst_lon(mlon-1))
 ;===================================================================
 ; generate lat weights 
 ;===================================================================
-;gridtype= get_gridtype(dst_lat)
-gridtype = 2
-print("Overriding grid detection. hardcoding gridtype=2")
+gridtype= get_gridtype(dst_lat)
+;gridtype = 2
+;print("Overriding grid detection. hardcoding gridtype=2")
 if ( gridtype .eq. 3  ) then
   print("Detected FV offset grid")
   gw  = NormCosWgtGlobe(dst_lat)
