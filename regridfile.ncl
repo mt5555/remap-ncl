@@ -47,6 +47,7 @@ function get_gridtype(lat)
 local d1,d2
 begin
   gauss_grid = -1
+  print("lat(0) = "+lat(0))
   if (lat(0) .lt. -89.99999 ) then
     gauss_grid = 2    ; use shaec routines
   else
@@ -161,11 +162,14 @@ lon@units = "degrees_east"
 lon&lon   =  lon
 mlon      = dimsizes(lon)            ; same as dst_mlon
 print("interpolating to output grid of size: "+nlat+" x "+mlon)
-
+print("dst_lat range: "+dst_lat(0)+" "+dst_lat(nlat-1))
+print("dst_lon range: "+dst_lon(0)+" "+dst_lon(mlon-1))
 ;===================================================================
 ; generate lat weights 
 ;===================================================================
 gridtype= get_gridtype(dst_lat)
+;gridtype = 2
+;print("Overriding grid detection. hardcoding gridtype=2")
 if ( gridtype .eq. 3  ) then
   print("Detected FV offset grid")
   gw  = NormCosWgtGlobe(dst_lat)
@@ -249,10 +253,15 @@ do fk=0,num_files-1
       unstructured_input=False   ; set for lat/lon input data
     end if
     dSizes   = getfiledimsizes(src_file)
-    ia       = ind(dNames.eq."lev" )   ; # of levels 
-    ib       = ind(dNames.eq."ilev")
-    klev     = dSizes(ia)
-    klevi    = dSizes(ib)
+    if (any(dNames.eq."lev")) then 
+      ia       = ind(dNames.eq."lev" )   ; # of levels 
+      ib       = ind(dNames.eq."ilev")
+      klev     = dSizes(ia)
+      klevi    = dSizes(ib)
+    else
+      klev     = 1
+      klevi    = 2
+    end if
                                        ; standard CAM dimensions
     dimNames = (/"time",    "lat",    "lon", "lev",  "ilev", "nbnd", "chars"/)  
     dimSizes = (/ -1   ,    nlat ,    mlon ,  klev,  klevi ,   2   ,    8   /) 
@@ -401,5 +410,6 @@ do fk=0,num_files-1
 
     delete(regridvar)
     delete(var_in)
+    print("done with file")
 end do ; loop over files
 end
