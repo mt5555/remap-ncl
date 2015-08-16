@@ -7,19 +7,19 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/esmf/ESMF_regridding.ncl"
 begin
 usage = False
 if (isvar("src")) then    
-  srcFileName = systemfunc("ls "+src)
+  srcGridName = systemfunc("ls "+src)
 else
   usage = True
 end if
 
 if (isvar("dst")) then    
-  dstFileName = systemfunc("ls "+dst)
+  dstGridName = systemfunc("ls "+dst)
 else
   usage = True
 end if
 
 if (isvar("base")) then    
-  wgitFileName = base
+  wgtFileName = base
 else
   usage = True
 end if
@@ -31,9 +31,9 @@ if ( usage ) then
                    "'base="+quote+"map_a_to_b"+quote+"' make_esmfmap.ncl")
   exit
 end if
-  print("src: "+srcGridName)
-  print("dst: "+dstGridName)
-  print("map: "+wgtFileName_full)
+
+print("src: "+srcGridName)
+print("dst: "+dstGridName)
 
 
   ; generate weights
@@ -45,15 +45,14 @@ end if
   print("map: "+wgtFileName_full)
   ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
 
-  Opt@InterpMethod         = "conserve"     ; default
-  wgtFileName_full = wgtFileName +"_aave.nc"  
-  print("map: "+wgtFileName_full)
-  ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
-
   Opt@InterpMethod         = "patch"     ; default
   wgtFileName_full = wgtFileName +"_patch.nc"  
   print("map: "+wgtFileName_full)
   ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
 
+  Opt@InterpMethod         = "conserve"     ; default
+  wgtFileName_full = wgtFileName +"_aave.nc"  
+  print("map: "+wgtFileName_full)
+  ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
 
 end
