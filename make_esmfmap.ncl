@@ -31,6 +31,14 @@ if ( usage ) then
                    "'base="+quote+"map_a_to_b"+quote+"' make_esmfmap.ncl")
   exit
 end if
+
+  
+if (isvar("nummaps")) then    
+else
+  nummaps = 3
+end if
+
+
   print("src: "+srcGridName)
   print("dst: "+dstGridName)
   print("map: "+wgtFileName_full)
@@ -40,20 +48,25 @@ end if
   Opt                      = True
   Opt@ForceOverwrite       = True
 
-  Opt@InterpMethod         = "bilinear"     ; default
-  wgtFileName_full = wgtFileName +"_bilin.nc"  
-  print("map: "+wgtFileName_full)
-  ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
+  if (nummaps .ge. 1) then
+    Opt@InterpMethod         = "bilinear"     ; default
+    wgtFileName_full = wgtFileName +"_bilin.nc"  
+    print("map: "+wgtFileName_full)
+    ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
+  end if
 
-  Opt@InterpMethod         = "conserve"     ; default
-  wgtFileName_full = wgtFileName +"_aave.nc"  
-  print("map: "+wgtFileName_full)
-  ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
+  if (nummaps .ge. 2) then
+    Opt@InterpMethod         = "conserve"     ; default
+    wgtFileName_full = wgtFileName +"_aave.nc"  
+    print("map: "+wgtFileName_full)
+    ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
+  end if
 
-  Opt@InterpMethod         = "patch"     ; default
-  wgtFileName_full = wgtFileName +"_patch.nc"  
-  print("map: "+wgtFileName_full)
-  ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
-
+  if (nummaps .ge. 3) then
+    Opt@InterpMethod         = "patch"     ; default
+    wgtFileName_full = wgtFileName +"_patch.nc"  
+    print("map: "+wgtFileName_full)
+    ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
+  end if
 
 end
