@@ -40,7 +40,7 @@ end if
 
   print("src: "+srcGridName)
   print("dst: "+dstGridName)
-  print("map: "+wgtFileName_full)
+
 
   ; generate weights
   Opt                      = True
@@ -48,7 +48,7 @@ end if
 
   if (nummaps .ge. 1) then
     Opt@InterpMethod         = "bilinear"     ; default
-    wgtFileName_full = wgtFileName +"_bilin.nc"  
+    wgtFileName_full = wgtFileName +"_bilin.nc"
     print("map: "+wgtFileName_full)
     ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
   end if
