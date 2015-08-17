@@ -7,19 +7,19 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/esmf/ESMF_regridding.ncl"
 begin
 usage = False
 if (isvar("src")) then    
-  srcFileName = systemfunc("ls "+src)
+  srcGridName = systemfunc("ls "+src)
 else
   usage = True
 end if
 
 if (isvar("dst")) then    
-  dstFileName = systemfunc("ls "+dst)
+  dstGridName = systemfunc("ls "+dst)
 else
   usage = True
 end if
 
 if (isvar("base")) then    
-  wgitFileName = base
+  wgtFileName = base
 else
   usage = True
 end if
@@ -32,7 +32,6 @@ if ( usage ) then
   exit
 end if
 
-  
 if (isvar("nummaps")) then    
 else
   nummaps = 3
@@ -42,7 +41,6 @@ end if
   print("src: "+srcGridName)
   print("dst: "+dstGridName)
   print("map: "+wgtFileName_full)
-
 
   ; generate weights
   Opt                      = True

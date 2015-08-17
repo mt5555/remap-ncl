@@ -14,6 +14,8 @@
 ; Mark Taylor, November 2014:  support remapping of lat/lon input files
 ; Mark Taylor, December 2014:  Added srcfile name and weightfile name to attributes
 ; Mark Taylor, January 2015:   Specify wgt and src files on NCL command line
+; Mark Taylor, Februrary 2015: Large file support
+; Mark Taylor, August 2015:    Process files without lev/ilev information
 ;
 ; NCL script to apply remap NETCDF files using an ESMF (SCRIP-format) mapping file
 ; 
