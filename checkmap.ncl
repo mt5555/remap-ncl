@@ -1,7 +1,7 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
-load "$NCARG_ROOT/lib/ncarg/nclscripts/esmf/ESMF_regridding.ncl"
+;load "$NCARG_ROOT/lib/ncarg/nclscripts/esmf/ESMF_regridding.ncl"
 
 
 begin
@@ -38,18 +38,19 @@ S = f->S
   print("mapping weights:  min/max= "+min(S)+" "+max(S))
 
   if (sum(area_a) .lt. .1) then
-    print("area_a values are bad. using equal weighting all points")
-    area_a = 4*pi/n_a
+    print("area_a values are bad. setting to 1")
+    area_a = 1
   end if
   if (sum(area_b) .lt. .1) then
-    print("area_b values are bad. using equal weighting all points")
-    area_b = 4*pi/n_b
+    print("area_b values are bad. setting to 1")
+    area_b = 1
   end if
 
   colsum=new(n_a,double)
   colnum=new(n_a,integer)
   colsum=0
   colnum=0
+ 
   
   rowsum=new(n_b,double)
   rownum=new(n_b,integer)
@@ -62,7 +63,7 @@ S = f->S
   do i=0,n_s-1
     ic=col(i)-1
     ir=row(i)-1
-    if (mod(i,500000).eq.0) then
+    if (mod(i,1000000).eq.0) then
        print(i+"/"+n_s)
     end if
     colsum(ic)=colsum(ic)+S(i)*area_b(ir)
@@ -74,8 +75,6 @@ S = f->S
   rowsum_mask=mask(rowsum,mask_b,1)
   print("row sum (should be 1.0.  positive and 1.0 for monotonicity)")
   print("  min/max = "+min(rowsum_mask)+" "+max(rowsum_mask))
-  print("area weighted col sum  (0 indicates MISSING target points)")
-  print("   min/max = "+min(colsum)+" "+max(colsum))
   print("area weighted col sum - area_a  (should be 0.0 for conservation)")
   print("   min/max = "+min(colsum-area_a)+" "+max(colsum-area_a))
 
@@ -95,6 +94,7 @@ S = f->S
  
   print("distribution of number of entries in each column")
   print("(number of target grid points created by a source grid delta function)")
+  print("0 = number of points on source grid which do not contribute")
   imax=max(colnum)
   if (imax.gt.20) then
     imax=20  
@@ -112,6 +112,7 @@ S = f->S
 
   print("distribution of number of entries in each rows")
   print("(number of source grid points which contribute to each target grid point)")
+  print("0 = number of points on target grid which are not mapped")
   imax=max(rownum)
   if (imax.gt.10) then
     imax=10  
