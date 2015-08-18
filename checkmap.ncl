@@ -23,8 +23,15 @@ S = f->S
 
   area_a = f->area_a
   area_b = f->area_b
-  mask_a = f->mask_a
-  mask_b = f->mask_b
+  if (isfilevar(f,"mask_a")) then
+     mask_a = f->mask_a
+     mask_b = f->mask_b
+  else
+     mask_a = new(n_a,integer)
+     mask_b = new(n_b,integer)
+     mask_a = 1
+     mask_b = 1
+  end if
   row = f->row
   col = f->col
 
