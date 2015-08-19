@@ -100,16 +100,18 @@ S = f->S
   end do
  
   print("distribution of number of entries in each column")
-  print("(number of target grid points created by a source grid delta function)")
-  print("0 = number of points on source grid which do not contribute")
+  print("first number:   number of nonzero entries")
+  print("second number:  number of columns with that many nonzero entries")
   imax=max(colnum)
   if (imax.gt.20) then
-    imax=20  
+    imax=15
   end if
   do i=0,imax
-     if (ccount(i) .gt. 0 ) then
-        print(i + "   " + ccount(i))
-     end if
+    if (i.eq.0) then
+      print(i + "   " + ccount(i)+" (these points do not contribute to output grid)")
+    else
+      print(i + "   " + ccount(i))
+    end if
   end do     
   if (imax.lt.max(colnum)) then
     print(i+"+  " + sum(ccount(imax+1:)))
@@ -117,17 +119,19 @@ S = f->S
 
 
 
-  print("distribution of number of entries in each rows")
-  print("(number of source grid points which contribute to each target grid point)")
-  print("0 = number of points on target grid which are not mapped")
+  print("distribution of number of entries in each row")
+  print("first number:   number of nonzero entries")
+  print("second number:  number of rows with that many nonzero entries")
   imax=max(rownum)
   if (imax.gt.10) then
-    imax=10  
+    imax=15  
   end if
   do i=0,imax
-     if (rcount(i) .gt. 0 ) then
-        print(i + "   " + rcount(i))
-     end if
+    if (i.eq.0) then
+      print(i + "   " + rcount(i)+" (WARNING: no data mapped to these points)")
+    else
+      print(i + "   " + rcount(i))
+    end if
   end do     
   if (imax.lt.max(rownum)) then
     print(i+"+  " + sum(rcount(imax+1:)))
