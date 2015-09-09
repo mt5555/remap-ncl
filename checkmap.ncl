@@ -5,6 +5,14 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 
 
 begin
+  print("map file checker v1. M. Taylor 2015-09-09")
+  print("One should verify that:")
+  print("- sum of area weights is close to 4pi (if global grid")
+  print("- mapping weights are in [0,1] for monotone maps")
+  print("- mapping weights are near [0,1] for other maps")
+  print("- row sums = 1 (correctly maps constant function)")
+  print("- area_b weighted column sum ~ area_a (exact for conservation)")
+  print("- no missing target points (unless source grid has holes)")
 
   if (isvar("map")) then    
     mapname = map
@@ -80,9 +88,9 @@ S = f->S
   end do
   ; put missing values where mask_b /= 1
   rowsum_mask=mask(rowsum,mask_b,1)
-  print("row sum (should be 1.0.  positive and 1.0 for monotonicity)")
+  print("row sums (should be 1.0)")
   print("  min/max = "+min(rowsum_mask)+" "+max(rowsum_mask))
-  print("area weighted col sum - area_a  (should be 0.0 for conservation)")
+  print("area weighted col sums - area_a  (should be 0.0 for conservation)")
   print("   min/max = "+min(colsum-area_a)+" "+max(colsum-area_a))
 
 
@@ -99,44 +107,24 @@ S = f->S
     rcount(rownum(ir)) = rcount(rownum(ir)) +1
   end do
  
-  print("distribution of number of entries in each column")
-  print("first number:   number of nonzero entries")
-  print("second number:  number of columns with that many nonzero entries")
-  imax=max(colnum)
-  if (imax.gt.20) then
-    imax=15
+  print("Histogram of non-zero row/column entries")
+  print("column 1: number of nonzero entries (histogram bin)")
+  print("column 2: number of columns with that many nonzero entries")
+  print("column 3: number of rows with that many nonzero entries")
+
+  imax = min(array_append_record (max(rownum),max(colnum), 0))
+
+  if (imax.gt.30) then
+    imax=30
   end if
   do i=0,imax
-    if (i.eq.0) then
-      print(i + "   " + ccount(i)+" (these points do not contribute to output grid)")
-    else
-      print(i + "   " + ccount(i))
-    end if
+    print(i + "   " + ccount(i)+ "   " + rcount(i))
   end do     
   if (imax.lt.max(colnum)) then
-    print(i+"+  " + sum(ccount(imax+1:)))
+    print(i+"+  " + sum(ccount(imax+1:))+"  " + sum(rcount(imax+1:)))
   end if
-
-
-
-  print("distribution of number of entries in each row")
-  print("first number:   number of nonzero entries")
-  print("second number:  number of rows with that many nonzero entries")
-  imax=max(rownum)
-  if (imax.gt.10) then
-    imax=15  
-  end if
-  do i=0,imax
-    if (i.eq.0) then
-      print(i + "   " + rcount(i)+" (WARNING: no data mapped to these points)")
-    else
-      print(i + "   " + rcount(i))
-    end if
-  end do     
-  if (imax.lt.max(rownum)) then
-    print(i+"+  " + sum(rcount(imax+1:)))
-  end if
-
+  print("Number of ignored source points (empty columns): "+ccount(0))
+  print("Number of missing target points (empty rows):    "+rcount(0))
 
 
 
