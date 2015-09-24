@@ -112,19 +112,32 @@ S = f->S
   print("column 2: number of columns with that many nonzero entries")
   print("column 3: number of rows with that many nonzero entries")
 
-  imax = min(array_append_record (max(rownum),max(colnum), 0))
-  if (imax.gt.30) then
-    imax=30
-  end if
+  imax=30
   do i=0,imax
-    print(i + "   " + ccount(i)+ "   " + rcount(i))
+    if ( (i .le. max(colnum)) .and. (i .le. max(rownum) ) ) then
+       print(i + "   " + ccount(i)+ "   " + rcount(i))
+    else 
+       if ( i .le. max(colnum)) then
+          print(i + "   " + ccount(i)+ "   " + 0)
+       else 
+          if ( i .le. max(rownum)) then
+            print(i + "   " + 0 + "   " + rcount(i))
+          end if
+       end if
+    end if
   end do     
-  if ((imax).lt.max(colnum)) then
-    print(i+"+  " + sum(ccount(imax:)))
+  if ((imax.lt.max(colnum)) .and. (imax.lt.max(rownum)) )  then
+    print(i + "+  " + sum(ccount(imax+1:)) + "   " + sum(rcount(imax+1:))  )
+  else
+    if (imax.lt.max(rownum)) then
+    print(i + "+  " + 0 + "   " + sum(rcount(imax+1:))  )
+    else
+      if (imax.lt.max(colnum)) then
+    print(i + "+  " + sum(ccount(imax+1:)) + "   " + 0 )
+      end if
+    end if
   end if
-  if ((imax).lt.max(rownum)) then
-    print(i+"+         "+sum(rcount(imax:)))
-  end if
+
   print("Number of ignored source points (empty columns): "+ccount(0))
   print("Number of missing target points (empty rows):    "+rcount(0))
 
