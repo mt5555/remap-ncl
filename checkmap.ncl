@@ -7,7 +7,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 begin
   print("map file checker v1. M. Taylor 2015-09-09")
   print("One should verify that:")
-  print("- sum of area weights is close to 4pi (if global grid")
+  print("- sum of area weights is close to physical area (if nonzero weights)")
   print("- mapping weights are in [0,1] for monotone maps")
   print("- mapping weights are near [0,1] for other maps")
   print("- row sums = 1 (correctly maps constant function)")
@@ -113,15 +113,14 @@ S = f->S
   print("column 3: number of rows with that many nonzero entries")
 
   imax = min(array_append_record (max(rownum),max(colnum), 0))
-
   if (imax.gt.30) then
     imax=30
   end if
-  do i=0,imax
+  do i=0,imax-1
     print(i + "   " + ccount(i)+ "   " + rcount(i))
   end do     
-  if (imax.lt.max(colnum)) then
-    print(i+"+  " + sum(ccount(imax+1:))+"  " + sum(rcount(imax+1:)))
+  if ((imax-1).lt.max(colnum)) then
+    print(i+"+  " + sum(ccount(imax:))+"  " + sum(rcount(imax:)))
   end if
   print("Number of ignored source points (empty columns): "+ccount(0))
   print("Number of missing target points (empty rows):    "+rcount(0))
