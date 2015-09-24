@@ -116,11 +116,14 @@ S = f->S
   if (imax.gt.30) then
     imax=30
   end if
-  do i=0,imax-1
+  do i=0,imax
     print(i + "   " + ccount(i)+ "   " + rcount(i))
   end do     
-  if ((imax-1).lt.max(colnum)) then
-    print(i+"+  " + sum(ccount(imax:))+"  " + sum(rcount(imax:)))
+  if ((imax).lt.max(colnum)) then
+    print(i+"+  " + sum(ccount(imax:)))
+  end if
+  if ((imax).lt.max(rownum)) then
+    print(i+"+         "+sum(rcount(imax:)))
   end if
   print("Number of ignored source points (empty columns): "+ccount(0))
   print("Number of missing target points (empty rows):    "+rcount(0))
