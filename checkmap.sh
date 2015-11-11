@@ -7,12 +7,12 @@ if ($#argv < 1 ) then
    exit
 endif
 
+set dirname=`dirname $0`
 set mapfile = $1
 
 echo "mapfile: "  $mapfile
 
 set arg0 = map=\"$mapfile\"
 
-ncl  "$arg0" ~/codes/remap-ncl/checkmap.ncl
-
+ncl  "$arg0" $dirname/checkmap.ncl
 
