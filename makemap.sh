@@ -25,12 +25,13 @@ set esmf = "mpirun -np 8  $exe"
 
 
 # run ESMF directly
+# for MPAS source grids, add:  --src_regional -i
 
 set map = {$base}_bilin.nc
-$esmf  -d $dst -s $src  -w $map --method bilinear
+$esmf   -d $dst -s $src  -w $map --method bilinear
 
 set map = {$base}_aave.nc
-$esmf  -d $dst -s $src  -w $map --method conserve
+$esmf   -d $dst -s $src  -w $map --method conserve
 
 #set map = {$base}_patch.nc
 #$esmf  -d $dst -s $src  -w $map --method patch
