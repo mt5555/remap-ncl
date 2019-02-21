@@ -47,18 +47,19 @@ end if
   Opt@ForceOverwrite       = True
 
   if (nummaps .ge. 1) then
+    Opt@InterpMethod         = "conserve"     ; default
+    wgtFileName_full = wgtFileName +"_aave.nc"  
+    print("map: "+wgtFileName_full)
+    ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
+  end if
+
+  if (nummaps .ge. 2) then
     Opt@InterpMethod         = "bilinear"     ; default
     wgtFileName_full = wgtFileName +"_bilin.nc"
     print("map: "+wgtFileName_full)
     ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
   end if
 
-  if (nummaps .ge. 2) then
-    Opt@InterpMethod         = "conserve"     ; default
-    wgtFileName_full = wgtFileName +"_aave.nc"  
-    print("map: "+wgtFileName_full)
-    ESMF_regrid_gen_weights(srcGridName,dstGridName,wgtFileName_full,Opt)
-  end if
 
   if (nummaps .ge. 3) then
     Opt@InterpMethod         = "patch"     ; default
