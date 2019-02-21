@@ -1,4 +1,4 @@
-#!/bin/tcsh -f
+#!/bin/tcsh 
 #
 #  wrapper for regridfile.ncl
 #

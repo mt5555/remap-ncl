@@ -12,6 +12,8 @@ begin
   print("- mapping weights are near [0,1] for other maps")
   print("- row sums = 1 (correctly maps constant function)")
   print("- area_b weighted column sum ~ area_a (exact for conservation)")
+  print("    for grids a<=b, expect min/max to be zero")
+  print("    for regional (a>b): expect min<0, max=0")
   print("- no missing target points (unless source grid has holes)")
 
   if (isvar("map")) then    
@@ -52,14 +54,14 @@ S = f->S
   print("sum area_b weights - 4pi: "+ (sum(area_b)-4*pi) ) 
   print("mapping weights:  min/max= "+min(S)+" "+max(S))
 
-  if (sum(area_a) .lt. .1) then
-    print("area_a values are bad. setting to 1")
-    area_a = 1
-  end if
-  if (sum(area_b) .lt. .1) then
-    print("area_b values are bad. setting to 1")
-    area_b = 1
-  end if
+;  if (sum(area_a) .lt. .1) then
+;    print("area_a values are bad. setting to 1")
+;    area_a = 1
+;  end if
+;  if (sum(area_b) .lt. .1) then
+;    print("area_b values are bad. setting to 1")
+;    area_b = 1
+;  end if
 
   colsum=new(n_a,double)
   colnum=new(n_a,integer)
