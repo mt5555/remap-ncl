@@ -10,10 +10,11 @@ begin
   print("- sum of area weights is close to physical area (if nonzero weights)")
   print("- mapping weights are in [0,1] for monotone maps")
   print("- mapping weights are near [0,1] for other maps")
-  print("- row sums = 1 (correctly maps constant function)")
-  print("- area_b weighted column sum ~ area_a (exact for conservation)")
-  print("    for grids a<=b, expect min/max to be zero")
-  print("    for regional (a>b): expect min<0, max=0")
+  print("- frac_b(rowsum) = 1 (correctly maps constant function)")
+  print("-   for regional (a<b) expect min<1, max=1")
+  print("- frac_a (area_b weighted column sum / area_a) ~ 1 for conservation)")
+  print("    for grids a<=b, expect min/max ~1")
+  print("    for regional (a>b): expect min<1, max=1")
   print("- no missing target points (unless source grid has holes)")
 
   if (isvar("map")) then    
@@ -21,15 +22,32 @@ begin
   else
     mapname = "map_181x360_to_conusx4v1np4qw_bilin.nc"
   end if
-f = addfile(mapname,"r")
+  f = addfile(mapname,"r")
 
-n_s = dimsizes(f->col)
-n_b = dimsizes(f->area_b)
-n_a = dimsizes(f->area_a)
-print("n_a = "+n_a+" n_b="+n_b) 
-print("n_s = "+n_s+" max(row)="+max(f->row)+" max(col)="+max(f->col))
+  n_s = dimsizes(f->col)
+  n_b = dimsizes(f->area_b)
+  n_a = dimsizes(f->area_a)
+  print("sparse matrix size n_s="+n_s) 
+  
+  row = f->row
+  col = f->col
+  print("n_a="+n_a+"  col index min/max= "+min(col)+" "+max(col))
+  print("n_b="+n_b+"  row index min/max= "+min(row)+" "+max(row))
+  if (min(row) .lt. 1 ) then
+    print("error: row index < 1")
+  end if
+  if (max(row) .gt. n_b ) then
+    print("error: row index > n_b")
+  end if
+  if (min(col) .lt. 1 ) then
+    print("error: col index < 1")
+  end if
+  if (max(col) .gt. n_a ) then
+    print("error: col index > n_a")
+  end if
 
-S = f->S
+
+  S = f->S
 
   area_a = f->area_a
   area_b = f->area_b
@@ -42,17 +60,16 @@ S = f->S
      mask_a = 1
      mask_b = 1
   end if
-  row = f->row
-  col = f->col
 
   pi=4*atan(1d0)
   print("grid a mask min/max: "+min(mask_a)+" "+max(mask_a))
   print("grid b mask min/max: "+min(mask_b)+" "+max(mask_b))
   print("area_a min/max= "+min(area_a)+" "+max(area_a))
   print("area_b min/max= "+min(area_b)+" "+max(area_b))
-  print("sum area_a weights - 4pi: "+ (sum(area_a) - 4*pi) )
-  print("sum area_b weights - 4pi: "+ (sum(area_b)-4*pi) ) 
+  print("sum area_a weights / 4pi: "+ (sum(area_a) / (4*pi)) )
+  print("sum area_b weights / 4pi: "+ (sum(area_b) / (4*pi)) ) 
   print("mapping weights:  min/max= "+min(S)+" "+max(S))
+
 
 ;  if (sum(area_a) .lt. .1) then
 ;    print("area_a values are bad. setting to 1")
@@ -90,10 +107,9 @@ S = f->S
   end do
   ; put missing values where mask_b /= 1
   rowsum_mask=mask(rowsum,mask_b,1)
-  print("row sums (should be 1.0)")
-  print("  min/max = "+min(rowsum_mask)+" "+max(rowsum_mask))
-  print("area weighted col sums - area_a  (should be 0.0 for conservation)")
-  print("   min/max = "+min(colsum-area_a)+" "+max(colsum-area_a))
+  print("frac_b(row sum) min/max = "+min(rowsum_mask)+" "+max(rowsum_mask))
+  print("frac_a(area_b weighted col sums / area_a)")
+  print("   min/max = "+min(colsum/area_a)+" "+max(colsum/area_a))
 
 
 ; compute row and col histogram
