@@ -29,25 +29,35 @@ begin
   n_a = dimsizes(f->area_a)
   print("sparse matrix size n_s="+n_s) 
   
+  S = f->S
   row = f->row
   col = f->col
-  print("n_a="+n_a+"  col index min/max= "+min(col)+" "+max(col))
-  print("n_b="+n_b+"  row index min/max= "+min(row)+" "+max(row))
+
+  print("n_a="+n_a+"  col index (1-based) min/max= "+min(col)+" "+max(col))
+  print("n_b="+n_b+"  row index (1-based) min/max= "+min(row)+" "+max(row))
+  ; row/col data is 1-based
   if (min(row) .lt. 1 ) then
     print("error: row index < 1")
+    ibad=ind(col.lt.1)
+    print("row(ibad)="+row(ibad)+" col(ibad)="+col(ibad)+" w="+S(ibad))
   end if
   if (max(row) .gt. n_b ) then
     print("error: row index > n_b")
+    ibad=ind(col.gt.n_b)
+    print("row(ibad)="+row(ibad)+" col(ibad)="+col(ibad)+" w="+S(ibad))
   end if
   if (min(col) .lt. 1 ) then
     print("error: col index < 1")
+    ibad=ind(col.lt.1)
+    print("row(ibad)="+row(ibad)+" col(ibad)="+col(ibad)+" w="+S(ibad))
   end if
   if (max(col) .gt. n_a ) then
     print("error: col index > n_a")
+    ibad=ind(col.gt.n_a)
+    print("row(ibad)="+row(ibad)+" col(ibad)="+col(ibad)+" w="+S(ibad))
   end if
 
 
-  S = f->S
 
   area_a = f->area_a
   area_b = f->area_b
@@ -95,8 +105,8 @@ begin
 ; row is the data_b index   ( homme grid )
   print("examing weights...")
   do i=0,n_s-1
-    ic=col(i)-1
-    ir=row(i)-1
+    ic=col(i)-1  ; convert to 0-based index
+    ir=row(i)-1  ; convert to 0-based index
     if (mod(i,1000000).eq.0) then
        print(i+"/"+n_s)
     end if
