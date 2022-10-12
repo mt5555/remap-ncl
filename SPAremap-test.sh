@@ -8,14 +8,18 @@ exepath=~/codes/tempestremap/
 wdir=~/scratch1/mapping
 
 name1=ne30np4
-name2=ne1024pg2
+grid1=TEMPEST_ne30.g
+
+#name2=ne1024pg2
+name2=ne30pg2
+grid2=TEMPEST_${name2}.g
 
 ./makeSE.sh 30
 ./makeSE.sh 1024
-./make_testdata.sh ne30np4   TEMPEST_ne30.g
-./make_testdata.sh ne1024pg2 TEMPEST_ne1024pg2.g
+./make_testdata.sh $name1   $grid1
+./make_testdata.sh $name2   $grid2
 
-./makeSEtoFV.sh  intbilin TEMPEST_ne30.g TEMPEST_ne1024pg2.g  "$name1" "$name2"
+./makeSEtoFV.sh  intbilin $grid1 $grid2  "$name1" "$name2"
 map=$wdir/maps/map_${name1}_to_${name2}_intbilin.nc
 if [ ! -f $map ]; then
     echo missing map: $map
@@ -23,7 +27,7 @@ if [ ! -f $map ]; then
 fi
 
 
-ncremap -map $map  \
+ncremap -5 -m $map  \
         $wdir/testdata/${name1}_testdata.nc \
         $wdir/testdata/${name2}_mapped.nc
 

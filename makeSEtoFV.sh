@@ -53,11 +53,11 @@ map_log=$wdir/maps/map_${name1}_to_${name2}_$maptype.log
 overlap=$wdir/maps/overlap_${name1}_${name2}.g
 overlap_log=$wdir/maps/overlap_${name1}_${name2}.log
 
-echo "OVERLAP mesh. log file in: $overlap_log"
 if [ -f $overlap ]; then
     echo found $overlap
     echo resusing this file and skippng GenerateOverlapMesh
 else
+    echo "OVERLAP mesh. log file in: $overlap_log"
     rm -f $overlap_log
     if ! $exepath/GenerateOverlapMesh --a $grid1 --b $grid2  --out $overlap   >& $overlap_log ; then
         echo "GenerateOverlapMesh failed"
@@ -76,11 +76,15 @@ case "$maptype" in
         echo "bad maptype  $maptype" ;  exit 1 ;;
 esac
 
-echo "GenerateOfflineMap: $maptype"
-echo "log file: $map_log"
-rm -f $map_log
-$exepath/GenerateOfflineMap --in_mesh $grid1  --out_mesh $grid2  --ov_mesh $overlap \
-  --in_type cgll --in_np 4  --out_type fv  \
-  --out_double --out_format Netcdf4 \
-  $algarg  --out_map $map >& $map_log
-
+if [ -f $map ]; then
+    echo found $map
+    echo resusing this file and skippng GenerateOfflineMap
+else
+    echo "GenerateOfflineMap: $maptype"
+    echo "log file: $map_log"
+    rm -f $map_log
+    $exepath/GenerateOfflineMap --in_mesh $grid1  --out_mesh $grid2  --ov_mesh $overlap \
+                                --in_type cgll --in_np 4  --out_type fv  \
+                                --out_double --out_format Netcdf4 \
+                                $algarg  --out_map $map >& $map_log
+fi
