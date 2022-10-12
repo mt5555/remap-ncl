@@ -1,9 +1,12 @@
 #!/bin/bash
 # 
 #
-# makeSEtoFV.sh maptype grid1 grid2  name1 name2 
+# makeFVtoSE.sh maptype grid1 grid2 name1 name2 
 #
-# TR maptypes:  intbilin, highorder, mono, bilin_tr, intbilin2
+# TR maptypes:  monotr (recommended), mono,  intbilin(new 2022, not tested)
+#
+# these maps were needed by V1 when running on np4 grids.
+# not used anymore and this script is not finished
 #
 #
 exepath=~/codes/tempestremap
@@ -11,11 +14,12 @@ wdir=~/scratch1/mapping
 
 args=("$@")
 if [ "$#" -lt "5" ]; then
+    echo "To configure: "
     echo "makeSEtoFV maptype grad1 grid2 name1 name2"
     echo ""
-    echo "maptype = intbilin, highorder, mono, ..."
+    echo "maptype = monotr, ... "
     echo "grid1 = exodus file (default np4)"
-    echo "grid2 = FV exodus file"
+    echo "grid2 = FV scrip file"
     echo "name1 = short name of grid1 (e.g. ne30np4)"
     echo "name2 = short name of grid2"
     exit 1
@@ -51,7 +55,7 @@ map=$wdir/maps/map_${name1}_to_${name2}_$maptype.nc
 map_log=$wdir/maps/map_${name1}_to_${name2}_$maptype.log
 
 overlap=$wdir/maps/overlap_${name1}_${name2}.g
-overlap_log=$wdir/maps/overlap_${name1}_${name2}.log
+overlap_log=$wdir/maps/overlap_${name1}_${name2}.g
 
 echo "OVERLAP mesh. log file in: $overlap_log"
 if [ -f $overlap ]; then
@@ -65,22 +69,5 @@ else
     fi
 fi
 
-case "$maptype" in
-    intbilin)
-        algarg="--method mono3 --correct_areas --noconserve" ;;
-    highorder)
-        algarg="--correct_areas" ;;
-    mono)
-        algarg="--method mono --correct_areas" ;;
-    *)
-        echo "bad maptype  $maptype" ;  exit 1 ;;
-esac
-
-echo "GenerateOfflineMap: $maptype"
-echo "log file: $map_log"
-rm -f $map_log
-$exepath/GenerateOfflineMap --in_mesh $grid1  --out_mesh $grid2  --ov_mesh $overlap \
-  --in_type cgll --in_np 4  --out_type fv  \
-  --out_double --out_format Netcdf4 \
-  $algarg  --out_map $map >& $map_log
+TODO
 

@@ -4,23 +4,45 @@
 #
 #
 exepath=~/codes/tempestremap/
-wdir=~/scratch1/mapping
-cd $wdir
+wdir=~/scratch1/mapping/grids
 
-NE=1024
+
+args=("$@")
+if [ "$#" -lt "1" ]; then
+    echo "makeSE.sh NE [PG]"
+    exit 1
+fi
+PG=2
+if [ "$#" -ge "2" ]; then
+    PG=$2
+fi
+
+
+cd $wdir
+NE=$1
 atmname=ne${NE}
 atmgrid=TEMPEST_${atmname}.g
-atm_pg2=TEMPEST_${atmname}pg2.g
-atm_scrip=TEMPEST_${atmname}pg2.scrip.nc
-atm_scrip1=TEMPEST_${atmname}pg1.scrip.nc
+atm_pg=TEMPEST_${atmname}pg${PG}.g
+atm_scrip=TEMPEST_${atmname}pg${PG}.scrip.nc
+
+if [ -f $atm_scrip ] ; then
+    echo nothing to make, found $atm_scrip
+    exit 1
+fi
+
 
 # generate a Tempest NE8 mesh.  should match HOMME
 $exepath/GenerateCSMesh --alt --res $NE  --file $atmgrid
-$exepath/GenerateVolumetricMesh --in $atmgrid --out $atm_pg2 --np 2 --uniform
-$exepath/ConvertMeshToSCRIP --in $atm_pg2 --out $atm_scrip
+if [ "$PG" -ge 2 ]; then
+    $exepath/GenerateVolumetricMesh --in $atmgrid --out $atm_pg --np $PG --uniform
+    $exepath/ConvertMeshToSCRIP --in $atm_pg --out $atm_scrip
+else
+    # PG1 case is just the .g grid
+    $exepath/ConvertMeshToSCRIP --in $atmgrid --out $atm_scrip    
+fi
 
-# make a "pg1" grid
-#$exepath/ConvertMeshToSCRIP --in $atmgrid --out $atm_scrip1
+
+
 
 
 

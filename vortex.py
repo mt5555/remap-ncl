@@ -1,3 +1,44 @@
+#!/usr/bin/env python
+# Contour over maps of lat/lon data
+# python contour_latlon.py
+#
+#
+# contour.py -i inputfile  [options]  varname
+#
+from __future__ import print_function
+import os, numpy
+from netCDF4 import Dataset
+
+
+
+mapfile="~/scratch1/mapping/maps/map_ne30np4_to_ne1024pg2_intbilin.nc"
+mapf = Dataset(mapfile,"r")
+#print(mapf.data_model)
+#print(mapf.variables.keys())
+#for d in mapf.dimensions.items():
+#    print(d)
+#print(S.dimensions)
+
+S=mapf.variables['S'][:]
+row=mapf.variables['row'][:]
+col=mapf.variables['col'][:]
+lat_a = mapf.variables['xc_a'][:]
+lon_a = mapf.variables['yc_a'][:]
+lat_b = mapf.variables['xc_b'][:]
+lon_b = mapf.variables['yc_b'][:]
+area_b = mapf.variables['area_b'][:]
+
+n_a = len(lat_a)
+n_b = len(lat_b)
+
+mapf.close()
+os.sys.exit(1)
+
+
+
+
+
+
 #
 # Converted from TR C++ code
 #
@@ -48,28 +89,25 @@ def vortex(dLon_in,dLat_in):
 
 
 
-code:
-read in mapping file
-compute vortex at sourc grid x_c,y_c
-map to target grid x_c,y_c
-compute vortex on target grid
-compute l2 and max error
+data_a=numpy.zeros(n_a)
+data_b=numpy.zeros(n_b)
+data_b_exact=numpy.zeros(n_b)
 
-  do i=0,n_s-1
+# check which is lat, which is lon
+# check radians or degrees?  (convert to radians)
+for i in range(n_a):
+    data_a[i]=vortex(xc_a[i],yc_a[i])
+for i in range(n_b):
+    data_b_exact[i]=vortex(xc_b[i],yc_b[i])
+
+
+for i in range(len(S)):
     ic=col(i)-1        # convert to zero indexing
     ir=row(i)-1
-    if (mod(i,1000000).eq.0) then
-       print(i+"/"+n_s)
-    end if
-    colsum(ic)=colsum(ic)+S(i)*area_b(ir)
-    colnum(ic)=colnum(ic)+1
-    rowsum(ir)=rowsum(ir)+S(i)
-    rownum(ir)=rownum(ir)+1
-  end do
+    data_b[ir] += data_a[ic]*S[i]
 
-
-row_k dot xin = xout(k)
-mask?
-  only considier xout(k) where mask_b=1?
-
+# compute error between data_b and data_b_exact
+max_err = max( abs(data_b-data_b_exact) ) / max( abs( data_b_exact ))
+l2_err = sum( area_b*(data_b-data_b_exact)**2 ) / sum(area_b)
+l2_err = sqrt(l2_err)
 
