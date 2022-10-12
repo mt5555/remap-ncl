@@ -1,14 +1,10 @@
 #!/usr/bin/env python
-# Contour over maps of lat/lon data
-# python contour_latlon.py
-#
-#
-# contour.py -i inputfile  [options]  varname
+# 
+# read map file, apply to vortex data, compute error
 #
 from __future__ import print_function
 import os, numpy
 from netCDF4 import Dataset
-
 
 
 mapfile="~/scratch1/mapping/maps/map_ne30np4_to_ne1024pg2_intbilin.nc"
