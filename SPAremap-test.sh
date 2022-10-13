@@ -23,13 +23,18 @@ fi
 ./make_testdata.sh $name1   $grid1
 ./make_testdata.sh $name2   $grid2
 
+# ncreamp + referror.py: 2min
 ncremap -5 -m $map  \
         $wdir/testdata/${name1}_testdata.nc \
         $wdir/testdata/${name2}_mapped.nc
 
+
 ./referror.py $wdir/testdata/${name2}_testdata.nc  $wdir/testdata/${name2}_mapped.nc
 
+
+# slow: 24min
 # python script to apply map file directly
 # doesn't integrate analytic solution over FV cells, errors 2x larger
-./vortex.py $map
+time ./vortex.py $map
+
 
