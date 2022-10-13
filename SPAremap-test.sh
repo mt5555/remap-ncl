@@ -10,8 +10,8 @@ wdir=~/scratch1/mapping
 name1=ne30np4
 grid1=TEMPEST_ne30.g
 
-name2=ne1024pg2
-#name2=ne30pg2
+#name2=ne1024pg2
+name2=ne30pg2
 grid2=TEMPEST_${name2}.g
 map=$wdir/maps/map_${name1}_to_${name2}_intbilin.nc
 if [ ! -f $map ]; then
@@ -28,13 +28,15 @@ ncremap -5 -m $map  \
         $wdir/testdata/${name1}_testdata.nc \
         $wdir/testdata/${name2}_mapped.nc
 
-
-./referror.py $wdir/testdata/${name2}_testdata.nc  $wdir/testdata/${name2}_mapped.nc
-
+./referror.py vortex $wdir/testdata/${name2}_testdata.nc  $wdir/testdata/${name2}_mapped.nc
+#./referror.py Y2_2   $wdir/testdata/${name2}_testdata.nc  $wdir/testdata/${name2}_mapped.nc
+#./referror.py Y16_32 $wdir/testdata/${name2}_testdata.nc  $wdir/testdata/${name2}_mapped.nc 
 
 # slow: 24min
 # python script to apply map file directly
 # doesn't integrate analytic solution over FV cells, errors 2x larger
-time ./vortex.py $map
+./vortex.py $map
 
-
+~/codes/nclscripts/contour/contour.py \
+    -i $wdir/testdata/${name2}_mapped.nc \
+   -y mpl -r 4096x8192 -m europe -c 5 vortex

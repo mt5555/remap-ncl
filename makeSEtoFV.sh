@@ -1,7 +1,7 @@
 #!/bin/bash
 # 
 #
-# makeSEtoFV.sh maptype grid1 grid2  name1 name2 
+# makeSEtoFV.sh maptype name1 grid1 name2 grid2
 #
 # TR maptypes:  intbilin, highorder, mono, bilin_tr, intbilin2
 #
@@ -11,7 +11,7 @@ wdir=~/scratch1/mapping
 
 args=("$@")
 if [ "$#" -lt "5" ]; then
-    echo "makeSEtoFV maptype grad1 grid2 name1 name2"
+    echo makeSEtoFV maptype name1 grad1 name2 grid2 
     echo ""
     echo "maptype = intbilin, highorder, mono, ..."
     echo "grid1 = exodus file (default np4)"
@@ -21,49 +21,22 @@ if [ "$#" -lt "5" ]; then
     exit 1
 fi
 maptype=$1
-grid1=$2
-grid2=$3
-name1=$4
-name2=$5
+name1=$2
+grid1=$3
+name2=$4
+grid2=$5
 
-if [ ! -x  $exepath/GenerateOverlapMesh ]; then
-    echo TR utilties missing
-    exit 1
-fi
-if [ ! -f $grid1 ]; then
-    if [ -f $wdir/grids/$grid1 ] ; then
-        grid1=$wdir/grids/$grid1
-    else
-        echo ERROR missing: $grid1
-        exit 1
-    fi
-fi
-if [ ! -f $grid2 ]; then
-    if [ -f $wdir/grids/$grid2 ] ; then
-        grid2=$wdir/grids/$grid2
-    else
-        echo ERROR missing: $grid2
-        exit 1
-    fi
+
+# check TR utilties, existence of grids, make overlap if needed
+make_overlap.sh $name1 $grid1 $name2 $grid2  || exit 1
+overlap=$wdir/maps/overlap_${name1}_${name2}.g
+if [ ! -f $overlap ]; then
+    overlap=$wdir/maps/overlap_${name2}_${name1}.g
 fi
 
 map=$wdir/maps/map_${name1}_to_${name2}_$maptype.nc
 map_log=$wdir/maps/map_${name1}_to_${name2}_$maptype.log
 
-overlap=$wdir/maps/overlap_${name1}_${name2}.g
-overlap_log=$wdir/maps/overlap_${name1}_${name2}.log
-
-if [ -f $overlap ]; then
-    echo found $overlap
-    echo resusing this file and skippng GenerateOverlapMesh
-else
-    echo "OVERLAP mesh. log file in: $overlap_log"
-    rm -f $overlap_log
-    if ! $exepath/GenerateOverlapMesh --a $grid1 --b $grid2  --out $overlap   >& $overlap_log ; then
-        echo "GenerateOverlapMesh failed"
-        exit 1
-    fi
-fi
 
 case "$maptype" in
     intbilin)

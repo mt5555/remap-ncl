@@ -71,7 +71,7 @@ def vortex(dLon_in,dLat_in):
 #################################################################################33
 mapf = Dataset(mapfile,"r")
 
-print("reading map file...")
+print("reading",mapfile)
 S=mapf.variables['S'][:]
 row=mapf.variables['row'][:]
 col=mapf.variables['col'][:]
@@ -85,14 +85,14 @@ lon_b = mapf.variables['xc_b'][:]
 area_b = mapf.variables['area_b'][:]
 
 deg_to_rad=pi/180
-print("lat_a min/max",min(lat_a),max(lat_a))
+print("lat_a",len(lat_a),"min/max",min(lat_a),max(lat_a))
 if max(lat_a)>pi:
-    print("converting source grid coords to radians")
+    print("  converting to radians")
     lat_a = lat_a*deg_to_rad
     lon_a = lon_a*deg_to_rad
-print("lat_b min/max",min(lat_b),max(lat_b))
+print("lat_b",len(lat_b),"min/max",min(lat_b),max(lat_b))
 if max(lat_b)>pi:
-    print("converting target grid coords to radians")
+    print("  converting to radians")
     lat_b = lat_b*deg_to_rad
     lon_b = lon_b*deg_to_rad
 
@@ -121,10 +121,6 @@ data_b_exact=vortex(lon_b,lat_b)
 #    data_b_exact[i]=vortex(lon_b[i],lat_b[i])
 
 print("applying mapfile...")
-print("data_a: ",len(data_a))
-print("data_b: ",len(data_b))
-print("row min/max: ",min(row),max(row))
-print("col min/max: ",min(col),max(col))
 #data_b[row[:]] += data_a[col[:]]*S[:]   # doesnt work
 for i in range(len(S)):
     data_b[row[i]] += data_a[col[i]]*S[i]
@@ -136,5 +132,5 @@ for i in range(len(S)):
 max_err = max( abs(data_b-data_b_exact) ) / max( abs( data_b_exact ))
 l2_err = sum( area_b*(data_b-data_b_exact)**2 ) / sum(area_b)
 l2_err = sqrt(l2_err)
-print("vortex: l2,max relative error: ",l2_err,max_err)
+print("vortex : relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
 
