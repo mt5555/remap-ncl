@@ -8,9 +8,10 @@ from netCDF4 import Dataset
 from math import pi
 from numpy import sin,cos,arctan2,arcsin,cosh,tanh,sqrt
 
-#mapfile="/Users/mataylo/scratch1/mapping/maps/map_ne30np4_to_ne1024pg2_intbilin.nc"
-mapfile="/Users/mataylo/scratch1/mapping/maps/map_ne30np4_to_ne30pg2_intbilin.nc"
-
+if len(os.sys.argv) < 2:
+    print("./vortex.py mapfilename.nc")
+    os.sys.exit(1)
+mapfile=(os.sys.argv[1])
 
 
 
@@ -83,17 +84,17 @@ lat_b = mapf.variables['yc_b'][:]
 lon_b = mapf.variables['xc_b'][:]
 area_b = mapf.variables['area_b'][:]
 
-deg_to_radians=pi/180
+deg_to_rad=pi/180
 print("lat_a min/max",min(lat_a),max(lat_a))
 if max(lat_a)>pi:
     print("converting source grid coords to radians")
-    lat_a = lat_a*deg_to_radians
-    lon_a = lon_a*deg_to_radians
+    lat_a = lat_a*deg_to_rad
+    lon_a = lon_a*deg_to_rad
 print("lat_b min/max",min(lat_b),max(lat_b))
 if max(lat_b)>pi:
     print("converting target grid coords to radians")
-    lat_b = lat_b*deg_to_radians
-    lon_b = lon_b*deg_to_radians
+    lat_b = lat_b*deg_to_rad
+    lon_b = lon_b*deg_to_rad
 
 n_a = len(lat_a)
 n_b = len(lat_b)
@@ -135,5 +136,5 @@ for i in range(len(S)):
 max_err = max( abs(data_b-data_b_exact) ) / max( abs( data_b_exact ))
 l2_err = sum( area_b*(data_b-data_b_exact)**2 ) / sum(area_b)
 l2_err = sqrt(l2_err)
-print("vortex: ",max(abs(data_b-data_b_exact)) , max( abs( data_b_exact ))   )
 print("vortex: l2,max relative error: ",l2_err,max_err)
+
