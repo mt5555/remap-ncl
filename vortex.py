@@ -7,6 +7,8 @@ import os, numpy
 from netCDF4 import Dataset
 from math import pi
 from numpy import sin,cos,arctan2,arcsin,cosh,tanh,sqrt
+import scipy as sp
+import scipy.sparse as sparse
 
 if len(os.sys.argv) < 2:
     print("./vortex.py mapfilename.nc")
@@ -115,19 +117,16 @@ data_b_exact=numpy.zeros(n_b)
 print("evaluating vortex...")
 data_a=vortex(lon_a,lat_a)
 data_b_exact=vortex(lon_b,lat_b)
-#for i in range(n_a):
-#    data_a[i]=vortex(lon_a[i],lat_a[i])
-#for i in range(n_b):
-#    data_b_exact[i]=vortex(lon_b[i],lat_b[i])
 
 print("applying mapfile...")
 #data_b[row[:]] += data_a[col[:]]*S[:]   # doesnt work
-for i in range(len(S)):
-    data_b[row[i]] += data_a[col[i]]*S[i]
 
-#for i in range(len(data_b)):
-#    print(i,data_b[i],data_b_exact[i])
+#for i in range(len(S)):                 # very slow
+#    data_b[row[i]] += data_a[col[i]]*S[i]
 
+S = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a))
+data_b = S @ data_a
+    
 # compute error between data_b and data_b_exact
 max_err = max( abs(data_b-data_b_exact) ) / max( abs( data_b_exact ))
 l2_err = sum( area_b*(data_b-data_b_exact)**2 ) / sum(area_b)
