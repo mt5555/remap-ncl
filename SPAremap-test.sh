@@ -10,8 +10,8 @@ wdir=~/scratch1/mapping
 name1=ne30np4
 grid1=TEMPEST_ne30.g
 
-name2=ne1024pg2
-#name2=ne30pg2
+#name2=ne1024pg2
+name2=ne30pg2
 grid2=TEMPEST_${name2}.g
 map=$wdir/maps/map_${name1}_to_${name2}_intbilin.nc
 if [ ! -f $map ]; then
@@ -20,15 +20,17 @@ if [ ! -f $map ]; then
 fi
 
 ################################################################
-# compute error directly.  25% slower then below of SciPy sparse matrix used
+# compute error directly from map file
 ###############################################################
-# python script to apply map file directly
-# doesn't integrate analytic solution over FV cells, errors 2x larger
+echo ====== computing cell center pointwise error:
 ./vortex.py $map
 
+
 ################################################################
-# make testdata, ncreamp, referror.py: 2:25
+# make testdata, ncreamp, referror.py and plot
 ###############################################################
+echo 
+echo ===== computing cell integrated error:
 ./make_testdata.sh $name1   $grid1
 ./make_testdata.sh $name2   $grid2
 
@@ -41,6 +43,7 @@ ncremap -5 -m $map  \
 #./referror.py Y16_32 $wdir/testdata/${name2}_testdata.nc  $wdir/testdata/${name2}_mapped.nc 
 
 
+exit 0
 ################################################################
 # make a plot of the mapped data
 ###############################################################

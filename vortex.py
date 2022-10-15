@@ -2,7 +2,6 @@
 # 
 # read map file, apply to vortex data, compute error
 #
-from __future__ import print_function
 import os, numpy
 from netCDF4 import Dataset
 from math import pi
@@ -114,22 +113,20 @@ data_b_exact=numpy.zeros(n_b)
 
 # check which is lat, which is lon
 # check radians or degrees?  (convert to radians)
-print("evaluating vortex...")
+print("evaluating vortex function at cell centers...")
 data_a=vortex(lon_a,lat_a)
 data_b_exact=vortex(lon_b,lat_b)
 
 print("applying mapfile...")
 #data_b[row[:]] += data_a[col[:]]*S[:]   # doesnt work
-
 #for i in range(len(S)):                 # very slow
 #    data_b[row[i]] += data_a[col[i]]*S[i]
-
-S = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a))
-data_b = S @ data_a
+data_b = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a)) @ data_a
     
 # compute error between data_b and data_b_exact
 max_err = max( abs(data_b-data_b_exact) ) / max( abs( data_b_exact ))
 l2_err = sum( area_b*(data_b-data_b_exact)**2 ) / sum(area_b)
 l2_err = sqrt(l2_err)
-print("vortex : relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
+print("norms of the pointwise error at cell centers:")
+print("vortex: relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
 

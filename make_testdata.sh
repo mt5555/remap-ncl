@@ -32,7 +32,7 @@ fi
 
 output=$wdir/testdata/${name}_testdata.nc
 if [ -f $output ] ; then
-    echo output found: $output
+    echo testdata found: $output
     exit 1
 fi
 if [[ $name == *"np4"* ]]; then
