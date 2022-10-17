@@ -80,8 +80,7 @@ case "$maptype" in
 esac
 
 if [ -f $map ]; then
-    echo found $map
-    echo resusing this file and skippng GenerateOfflineMap
+    echo reusing $map
 else
     echo "GenerateOfflineMap: $maptype"
     echo "log file: $map_log"

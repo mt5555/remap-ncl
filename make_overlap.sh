@@ -17,7 +17,7 @@ wdir=~/scratch1/mapping
 
 args=("$@")
 if [ "$#" -lt "4" ]; then
-    echo "make_overlap.sh grid1 grid2"
+    echo "make_overlap.sh name1 grid1 name2 grid2"
     echo "non-global grids should be grid1"
     exit 1
 fi

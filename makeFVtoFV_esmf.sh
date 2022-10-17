@@ -27,7 +27,6 @@ name2=$4
 grid2=$5
 
 
-
 if [ ! -x  $exepath/GenerateOfflineMap ]; then
     echo TR utilties missing
     exit 1
@@ -53,7 +52,7 @@ fi
 
 
 # check TR utilties, existence of grids, make overlap if needed
-./make_overlap.sh $grid1 $grid2 $name1 $name2  || exit 1
+./make_overlap.sh $name1 $grid1 $name2 $grid2  || exit 1
 overlap=$wdir/maps/overlap_${name1}_${name2}.g
 if [ ! -f $overlap ]; then
     overlap=$wdir/maps/overlap_${name2}_${name1}.g
@@ -76,8 +75,7 @@ case "$maptype" in
 esac
 
 if [ -f $map ]; then
-    echo found $map
-    echo resusing this file and skippng RegridWeightGen
+    echo reusing $map
 else
     echo "ESMF_RegridWeightGen: $maptype"
     ESMF_RegridWeightGen -d $grid2 -s $grid1  \
