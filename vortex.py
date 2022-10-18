@@ -9,6 +9,7 @@ from numpy import sin,cos,arctan2,arcsin,cosh,tanh,sqrt
 import scipy as sp
 import scipy.sparse as sparse
 
+
 if len(os.sys.argv) < 2:
     print("./vortex.py mapfilename.nc")
     os.sys.exit(1)
@@ -130,3 +131,31 @@ l2_err = sqrt(l2_err)
 print("norms of the pointwise error at cell centers:")
 print("vortex: relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
 
+
+os.sys.exit(0)
+######################################################################
+# plot of mapped field:
+######################################################################
+from matplotlib import pyplot
+from cartopy import crs
+
+dataproj=crs.PlateCarree()  # data is in lat/lon space
+plotproj=crs.PlateCarree(central_longitude=0.0) # projection for plot
+ax = pyplot.axes(projection=plotproj)
+ax.set_global()
+
+print("MPL plot using internal Delaunay triangulation")
+# do the triangulation in the plot coordinates for better results
+tcoords = plotproj.transform_points(dataproj,lon_b[:]/deg_to_rad,lat_b[:]/deg_to_rad)
+# need to remove non-visible points
+xi=tcoords[:,0]!=numpy.inf
+tc=tcoords[xi,:]
+data_b2=data_b[xi] 
+vmin=0.5
+vmax=1.5
+cmap='plasma'
+pl = ax.tripcolor(tc[:,0],tc[:,1], data_b2,vmin=vmin, vmax=vmax,
+                          shading='gouraud',cmap=cmap)
+#pl = ax.tricontourf(tc[:,0],tc[:,1], data_b2,vmin=vmin, vmax=vmax,
+#                          cmap=cmap)
+pyplot.savefig("vortex-mapped.pdf",dpi=300,orientation="portrait")
