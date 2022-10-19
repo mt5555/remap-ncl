@@ -132,30 +132,12 @@ print("norms of the pointwise error at cell centers:")
 print("vortex: relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
 
 
-os.sys.exit(0)
+#os.sys.exit(0)
 ######################################################################
 # plot of mapped field:
 ######################################################################
 from matplotlib import pyplot
-from cartopy import crs
-
-dataproj=crs.PlateCarree()  # data is in lat/lon space
-plotproj=crs.PlateCarree(central_longitude=0.0) # projection for plot
-ax = pyplot.axes(projection=plotproj)
-ax.set_global()
-
-print("MPL plot using internal Delaunay triangulation")
-# do the triangulation in the plot coordinates for better results
-tcoords = plotproj.transform_points(dataproj,lon_b[:]/deg_to_rad,lat_b[:]/deg_to_rad)
-# need to remove non-visible points
-xi=tcoords[:,0]!=numpy.inf
-tc=tcoords[xi,:]
-data_b2=data_b[xi] 
-vmin=0.5
-vmax=1.5
-cmap='plasma'
-pl = ax.tripcolor(tc[:,0],tc[:,1], data_b2,vmin=vmin, vmax=vmax,
-                          shading='gouraud',cmap=cmap)
-#pl = ax.tricontourf(tc[:,0],tc[:,1], data_b2,vmin=vmin, vmax=vmax,
-#                          cmap=cmap)
+ax=pyplot.axes()
+ax.tripcolor(lon_b/deg_to_rad,lat_b/deg_to_rad,data_b,vmin=0.5, vmax=1.5,
+                          shading='gouraud',cmap='plasma')
 pyplot.savefig("vortex-mapped.pdf",dpi=300,orientation="portrait")

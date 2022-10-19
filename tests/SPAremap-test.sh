@@ -14,6 +14,7 @@ grid1=TEMPEST_ne30.g
 name2=ne30pg2
 grid2=TEMPEST_${name2}.g
 map=$wdir/maps/map_${name1}_to_${name2}_intbilin.nc
+#map=$wdir/maps/map_ne30np4_to_ne1024pg2_nco_aave.c20220910.nc
 if [ ! -f $map ]; then
     echo missing map: $map
     exit 1
