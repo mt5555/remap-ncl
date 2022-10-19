@@ -101,7 +101,7 @@ if max(lat_b)>pi:
 n_a = len(lat_a)
 n_b = len(lat_b)
 
-mapf.close()
+
 
 
 
@@ -132,12 +132,4 @@ print("norms of the pointwise error at cell centers:")
 print("vortex: relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
 
 
-#os.sys.exit(0)
-######################################################################
-# plot of mapped field:
-######################################################################
-from matplotlib import pyplot
-ax=pyplot.axes()
-ax.tripcolor(lon_b/deg_to_rad,lat_b/deg_to_rad,data_b,vmin=0.5, vmax=1.5,
-                          shading='gouraud',cmap='plasma')
-pyplot.savefig("vortex-mapped.pdf",dpi=300,orientation="portrait")
+mapf.close()

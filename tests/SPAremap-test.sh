@@ -44,10 +44,12 @@ ncremap -5 -m $map  \
 #./referror.py Y16_32 $wdir/testdata/${name2}_testdata.nc  $wdir/testdata/${name2}_mapped.nc 
 
 
-exit 0
+#exit 0
 ################################################################
 # make a plot of the mapped data
 ###############################################################
 ~/codes/nclscript/contour/contour.py \
     -i $wdir/testdata/${name2}_mapped.nc \
-   -y mpl -r 4096x8192 -m europe -c 5 vortex
+    -s $wdir/grids/TEMPEST_${name2}.scrip.nc \
+   -y mpl   -m europe -c 5 vortex
+
