@@ -1,7 +1,9 @@
 #!/bin/bash
 #
-#  makeVortex.sh shortname grid
+#  test grids used by SPA remap for NE1024 SCREAM simulations
 #  Create .nc files with vortex, Y2_2 and Y16_32 analytic functions
+#
+#  good test case to show blockyness when using mono maps
 #
 #
 exepath=~/codes/tempestremap/

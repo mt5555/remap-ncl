@@ -26,8 +26,8 @@ atm_pg=TEMPEST_${atmname}pg${PG}.g
 atm_scrip=TEMPEST_${atmname}pg${PG}.scrip.nc
 
 if [ -f $atm_scrip ] ; then
-    echo nothing to make, found $atm_scrip
-    exit 1
+    echo reusing $atm_scrip
+    exit 0
 fi
 
 

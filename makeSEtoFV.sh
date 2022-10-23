@@ -27,8 +27,26 @@ name2=$4
 grid2=$5
 
 
+if [ ! -f $grid1 ]; then
+    if [ -f $wdir/grids/$grid1 ] ; then
+        grid1=$wdir/grids/$grid1
+    else
+        echo ERROR missing: $grid1
+        exit 1
+    fi
+fi
+if [ ! -f $grid2 ]; then
+    if [ -f $wdir/grids/$grid2 ] ; then
+        grid2=$wdir/grids/$grid2
+    else
+        echo ERROR missing: $grid2
+        exit 1
+    fi
+fi
+
+
 # check TR utilties, existence of grids, make overlap if needed
-make_overlap.sh $name1 $grid1 $name2 $grid2  || exit 1
+./make_overlap.sh $name1 $grid1 $name2 $grid2  || exit 1
 overlap=$wdir/maps/overlap_${name1}_${name2}.g
 if [ ! -f $overlap ]; then
     overlap=$wdir/maps/overlap_${name2}_${name1}.g
@@ -44,7 +62,7 @@ case "$maptype" in
     highorder)
         algarg="--correct_areas" ;;
     mono)
-        algarg="--method mono --correct_areas" ;;
+        algarg="--mono --correct_areas" ;;
     *)
         echo "bad maptype  $maptype" ;  exit 1 ;;
 esac
@@ -60,4 +78,8 @@ else
                                 --in_type cgll --in_np 4  --out_type fv  \
                                 --out_double --out_format Netcdf4 \
                                 $algarg  --out_map $map >& $map_log
+    if [ ! -f $map ]; then
+        echo GenerateOfflineMap failed
+        exit 1
+    fi
 fi

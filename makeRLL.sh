@@ -13,12 +13,16 @@ WDIR=~/scratch1/mapping/grids
 
 args=("$@")
 if [ "$#" -lt "1" ]; then
-    echo "makeRLL.sh  nlon  [cap,uni]"
+    echo "makeRLL.sh  nlon  [cap,uni] [lon_est]"
     exit 1
 fi
 type="cap"
 if [ "$#" -ge "2" ]; then
     type=$2
+fi
+wst=180.0  # lon default left edge is 180W
+if [ "$#" -ge "3" ]; then
+    wst=$3
 fi
 
 
@@ -32,7 +36,18 @@ else
   type=uni
 fi
 
-target=$WDIR/${nlat}x${nlon}_SCRIP.nc
+if [ $est ==  "180.0" ]; then
+    target=$WDIR/${nlat}x${nlon}_SCRIP.nc
+else
+    target=$WDIR/${nlat}x${nlon}-${wst}W_SCRIP.nc
+    # add option below:    \#lon_wst=${wst} 
+    echo not yet coded
+    exit 1
+fi
+if [ -f $target ]; then
+    echo reusing: $target
+    exit 0
+fi
 echo "RLL Mesh:  $target"
 
 
