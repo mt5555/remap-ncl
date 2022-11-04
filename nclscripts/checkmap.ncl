@@ -76,10 +76,20 @@ begin
   print("grid b mask min/max: "+min(mask_b)+" "+max(mask_b))
   print("area_a min/max= "+min(area_a)+" "+max(area_a))
   print("area_b min/max= "+min(area_b)+" "+max(area_b))
+  print("frac_a min/max= "+min(f->frac_a)+" "+max(f->frac_a))
+  print("frac_b min/max= "+min(f->frac_b)+" "+max(f->frac_b))
   print("sum area_a weights / 4pi: "+ (sum(area_a) / (4*pi)) )
   print("sum area_b weights / 4pi: "+ (sum(area_b) / (4*pi)) ) 
   print("mapping weights:  min/max= "+min(S)+" "+max(S))
 
+  ibadlist = ind(S .eq. max(S))
+  ibad=ibadlist(0);
+  print("max weight index: "+ibad)
+  rbad=row(ibad)-1
+  cbad=col(ibad)-1
+  print("row="+rbad+" frac_b(row)="+f->frac_b(rbad))
+  print("col="+cbad+" frac_a(col)="+f->frac_a(cbad))
+  
 
 ;  if (sum(area_a) .lt. .1) then
 ;    print("area_a values are bad. setting to 1")
@@ -105,21 +115,32 @@ begin
 ; row is the data_b index   ( homme grid )
   print("examing weights...")
   do i=0,n_s-1
+;  do i=23671483-1,23671488+1
     ic=col(i)-1  ; convert to 0-based index
     ir=row(i)-1  ; convert to 0-based index
     if (mod(i,1000000).eq.0) then
        print(i+"/"+n_s)
     end if
+    if (ir .eq. rbad) then
+       print("i="+i+" row="+rbad+" col="+ic+" S(i)="+S(i))
+       print("   frac_a(col),frac_b(row)="+f->frac_a(ic)+" "+f->frac_b(ir))
+       print("   area_a(col),area_b(row)="+area_a(ic)+" "+area_b(ir))
+    end if
     colsum(ic)=colsum(ic)+S(i)*area_b(ir)
     colnum(ic)=colnum(ic)+1
     rowsum(ir)=rowsum(ir)+S(i)
     rownum(ir)=rownum(ir)+1
+
   end do
+
   ; put missing values where mask_b /= 1
-  rowsum_mask=mask(rowsum,mask_b,1)
+  ;rowsum_mask=mask(rowsum,mask_b,1)  ; only look at rows where mask_b=1
+  rowsum_mask=mask(rowsum,((rownum.gt.0) .and. (mask_b.eq.1)),True)  ; only look at rows where rownum>0
+  
   print("frac_b(row sum) min/max = "+min(rowsum_mask)+" "+max(rowsum_mask))
   print("frac_a(area_b weighted col sums / area_a)")
   print("   min/max = "+min(colsum/area_a)+" "+max(colsum/area_a))
+
 
 
 ; compute row and col histogram
