@@ -1,31 +1,20 @@
-# remap-ncl
+remap utilities
 
-NCL scripts to create and apply SCRIP format mapping file to regrid a
-list of NetCDF files.
+a collection of scripts using NCO, ncremap and TempestRemap to
+create grids and mapping files
 
-1. CREATE MAPS
-Create a map from SCRIP format grid template files:
+SCRIP files:
 
-./makemap.sh grid1_scrip.nc grid2_scrip.nc map_grid1_to_grid2
+makeSE.sh     make Exodus and SCRIP files for SE grids
+makeRLL.sh    use ncremap to make SCRIP files for lat/lon grids
 
-which will produce:
+mapping files:
 
-map_grid1_to_grid2_aave.nc
-map_grid1_to_grid2_bilin.nc
-map_grid1_to_grid2_patch.nc
+makeSEtoFV.sh
+makeFVtoFV.sh   
+makeFVtoSE.sh   (not finished)
+nco and esmf options?
 
+vortex.sh     give a mapping file, compute L2 and max error for the vortex analytic function
 
-2. CHECK MAP
-ESMF sometimes leaves wholes in the map.
-
-./checkmap.sh map_grid1_to_grid2.nc
-
-
-3. REMAP NETCDF FILES:
-
-% ./remap.sh  mapfile.nc  inputfiles*.nc
-
-Or use NCL directly:
-
-$ ncl 'wgtfile="map_grid1_to_grid2_bilin.nc"' 'srcfile="*cam.h0*.nc"' regridfile.ncl
 
