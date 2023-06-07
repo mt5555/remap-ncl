@@ -8,10 +8,10 @@ exepath=~/codes/tempestremap/
 wdir=~/scratch1/mapping
 
 # maps needed:
-./makeFVtoFV_esmf.sh bilin \
+./makeFVtoFV.sh bilin_esmf \
       oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc \
       ne30pg2  TEMPEST_ne30pg2.scrip.nc             || exit 1
-./makeFVtoFV_esmf.sh bilin \
+./makeFVtoFV.sh bilin_esmf \
      ne30pg2  TEMPEST_ne30pg2.scrip.nc \
      oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc  || exit 1
 
