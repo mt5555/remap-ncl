@@ -2,12 +2,21 @@
 # 
 # read map file, apply to vortex data, compute error
 #
-import os, numpy
+import os, numpy, time
 from netCDF4 import Dataset
 from math import pi
 from numpy import sin,cos,arctan2,arcsin,cosh,tanh,sqrt
 import scipy as sp
 import scipy.sparse as sparse
+
+# use scipy instead:
+# import numba
+# @numba.njit()
+# def apply_map( data_a, S, row, col,n_b ):
+#   data_b=numpy.zeros(n_b)
+#   for k in range(len(S)):
+#     data_b[row[k]] = data_b[row[k]]  + data_a[col[k]] * S[k]
+#   return data_b
 
 
 if len(os.sys.argv) < 2:
@@ -119,10 +128,34 @@ data_a=vortex(lon_a,lat_a)
 data_b_exact=vortex(lon_b,lat_b)
 
 print("applying mapfile...")
-#data_b[row[:]] += data_a[col[:]]*S[:]   # doesnt work
-#for i in range(len(S)):                 # very slow
-#    data_b[row[i]] += data_a[col[i]]*S[i]
-data_b = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a)) @ data_a
+
+# NOT VALID:
+#data_b[row[:]] += data_a[col[:]]*S[:] 
+
+# SLOW!    ne30np4_to_ne1024pg2:  296s
+# tic=time.perf_counter()
+# for i in range(len(S)):                 # very slow
+#     data_b[row[i]] += data_a[col[i]]*S[i]
+# toc=time.perf_counter()
+# print(f"python loop:: {toc - tic:0.4f} seconds")
+
+# fastest.  ne30np4_to_ne1024pg2:  0.42s
+#tic=time.perf_counter()
+data_b = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a)) @ data_a  # need scypi
+#toc=time.perf_counter()
+#print(f"apply map via sparse.coo_matrix: {toc - tic:0.4f} seconds")
+
+
+# # Fast, but not as fast as scypy:   0.61s
+# S=numpy.ma.getdata(S)
+# data_a=numpy.ma.getdata(data_a)
+# row=numpy.ma.getdata(row)
+# col=numpy.ma.getdata(col)
+# tic=time.perf_counter()
+# data_b=apply_map(data_a,S,row,col,n_b)
+# toc=time.perf_counter()
+# print(f"apply map via numba: {toc - tic:0.4f} seconds")
+
     
 # compute error between data_b and data_b_exact
 max_err = max( abs(data_b-data_b_exact) ) / max( abs( data_b_exact ))
