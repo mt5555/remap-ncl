@@ -36,7 +36,7 @@ else
   type=uni
 fi
 
-if [ $est ==  "180.0" ]; then
+if [ $wst ==  "180.0" ]; then
     target=$WDIR/${nlat}x${nlon}_SCRIP.nc
 else
     target=$WDIR/${nlat}x${nlon}-${wst}W_SCRIP.nc
