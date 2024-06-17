@@ -6,35 +6,39 @@
 #
 exepath=~/codes/tempestremap/
 wdir=~/scratch1/mapping
+mkdir $wdir/grids
+mkdir $wdir/maps
+
 
 # maps needed:
+./makeFVtoFV.sh bilin \
+      oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc \
+      ne30pg2  TEMPEST_ne30pg2.scrip.nc   || exit 1  
+./makeFVtoFV.sh bilin \
+     ne30pg2  TEMPEST_ne30pg2.scrip.nc \
+     oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc  || exit 1  
+
+./makeFVtoFV.sh intbilingb \
+      oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc \
+      ne30pg2  TEMPEST_ne30pg2.scrip.nc  # FAILS 2023/7
+./makeFVtoFV.sh intbilingb \
+     ne30pg2  TEMPEST_ne30pg2.scrip.nc \
+     oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc   || exit 1
+
+./makeFVtoFV.sh intbilin \
+      oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc \
+      ne30pg2  TEMPEST_ne30pg2.scrip.nc     # FAILS 2023/7
+./makeFVtoFV.sh intbilin \
+     ne30pg2  TEMPEST_ne30pg2.scrip.nc \
+     oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc  || exit 1  
+
+
 ./makeFVtoFV.sh bilin_esmf \
       oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc \
       ne30pg2  TEMPEST_ne30pg2.scrip.nc             || exit 1
 ./makeFVtoFV.sh bilin_esmf \
      ne30pg2  TEMPEST_ne30pg2.scrip.nc \
      oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc  || exit 1
-
-./makeFVtoFV.sh bilin \
-      oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc \
-      ne30pg2  TEMPEST_ne30pg2.scrip.nc           
-./makeFVtoFV.sh bilin \
-     ne30pg2  TEMPEST_ne30pg2.scrip.nc \
-     oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc  || exit 1  
-
-./makeFVtoFV.sh intbilin \
-      oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc \
-      ne30pg2  TEMPEST_ne30pg2.scrip.nc           
-./makeFVtoFV.sh intbilin \
-     ne30pg2  TEMPEST_ne30pg2.scrip.nc \
-     oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc  || exit 1  
-
-./makeFVtoFV.sh intbilingb \
-      oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc \
-      ne30pg2  TEMPEST_ne30pg2.scrip.nc           
-./makeFVtoFV.sh intbilingb \
-     ne30pg2  TEMPEST_ne30pg2.scrip.nc \
-     oEC60to30v3 ocean.oEC60to30v3.scrip.181106.nc   || exit 1
 
                
 
@@ -45,10 +49,15 @@ name2=oEC60to30v3
 grid2=ocean.oEC60to30v3.scrip.181106.nc
 
 
-./vortex.py $wdir/maps/map_${name1}_to_${name2}_bilin.nc
-./vortex.py $wdir/maps/map_${name1}_to_${name2}_bilin_esmf.nc
-./vortex.py $wdir/maps/map_${name1}_to_${name2}_intbilin.nc
-./vortex.py $wdir/maps/map_${name1}_to_${name2}_intbilingb.nc
+#./vortex.py $wdir/maps/map_${name1}_to_${name2}_bilin.nc
+#./vortex.py $wdir/maps/map_${name1}_to_${name2}_bilin_esmf.nc
+#./vortex.py $wdir/maps/map_${name1}_to_${name2}_intbilin.nc
+#./vortex.py $wdir/maps/map_${name1}_to_${name2}_intbilingb.nc
+
+./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin.nc
+./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin_esmf.nc
+./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilin.nc
+./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilingb.nc
 
 
 
