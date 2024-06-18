@@ -5,6 +5,7 @@
 import os, numpy, time
 from netCDF4 import Dataset
 from math import pi
+import numpy as np
 from numpy import sin,cos,arctan2,arcsin,cosh,tanh,sqrt
 import scipy as sp
 import scipy.sparse as sparse
@@ -75,6 +76,38 @@ def vortex(dLon_in,dLat_in):
     return (1.0 - tanh(dRho / dD * sin(dLon - dOmega * dT)))
 
 
+def test_fields(dlon, dlat, test: str="y16_32"):
+    """
+    Python subroutine that packages functionality three types of test functions
+    
+    Args: 
+    dlon -- longitude value or vector
+    dlat -- latitude value or vector
+    test -- corresponds to which test function the user desires.
+    Can select one of ("vortex", "y2_2", and "y16_32"), with default = y16_32
+    """
+    # transform presumed input unit of degrees to radians
+    if np.max(dlon) > 3*pi:
+        dlon = np.deg2rad(dlon)
+        dlat = np.deg2rad(dlat)
+        
+    if test.lower() == "y16_32":
+        return (2 + np.power(np.sin(2 * dlat), 16) * np.cos(16 * dlon))
+    elif test.lower() == "y2_2":
+        return (2 + np.cos(dlat) * np.cos(dlat) * np.cos(2 * dlon))
+    elif test.lower() == "vortex":
+        return vortex(dlon,dlat)
+    else:
+        return("Incorrect test input -- please choose one of 'vortex', 'y2_2', 'y16_32'.")
+
+
+
+
+
+
+
+
+
 #################################################################################33
 #
 # main code
@@ -95,15 +128,18 @@ lat_b = mapf.variables['yc_b'][:]
 lon_b = mapf.variables['xc_b'][:]
 area_b = mapf.variables['area_b'][:]
 
+# should we check units?
+#if "radian" in infile.variables["xc_a"].units.lower():
+
 deg_to_rad=pi/180
-print("lat_a",len(lat_a),"min/max",min(lat_a),max(lat_a))
-if max(lat_a)>pi:
-    print("  converting to radians")
+#print("lat_a",len(lat_a),"min/max",min(lat_a),max(lat_a))
+if max(lat_a)>2*pi:
+    #print("  converting to radians")
     lat_a = lat_a*deg_to_rad
     lon_a = lon_a*deg_to_rad
-print("lat_b",len(lat_b),"min/max",min(lat_b),max(lat_b))
-if max(lat_b)>pi:
-    print("  converting to radians")
+#print("lat_b",len(lat_b),"min/max",min(lat_b),max(lat_b))
+if max(lat_b)>2*pi:
+    #print("  converting to radians")
     lat_b = lat_b*deg_to_rad
     lon_b = lon_b*deg_to_rad
 
@@ -121,12 +157,15 @@ data_a=numpy.zeros(n_a)
 data_b=numpy.zeros(n_b)
 data_b_exact=numpy.zeros(n_b)
 
-# check which is lat, which is lon
-# check radians or degrees?  (convert to radians)
-print("evaluating vortex function at cell centers...")
-data_a=vortex(lon_a,lat_a)
-data_b_exact=vortex(lon_b,lat_b)
+#testfield="y16_32"
+testfield="vortex"
+print("using testfield: ",testfield)
+data_a=test_fields(lon_a,lat_a,testfield)
+data_b_exact=test_fields(lon_b,lat_b,testfield)
 
+
+
+    
 print("applying mapfile...")
 
 # NOT VALID:
