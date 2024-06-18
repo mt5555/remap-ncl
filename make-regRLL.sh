@@ -1,8 +1,11 @@
 #!/bin/bash
 #
-# make SCRIP files for lat/lon grids
+# Use ncremap to make SCRIP files for regional lat/lon grids
 #
+# ./make-regRLL.sh region_name
 #
+# region names so far:
+#  NA1  0.03 degree (3.4km at Equator) over north atlantic
 #
 #
 #
