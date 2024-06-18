@@ -10,6 +10,8 @@ from numpy import sin,cos,arctan2,arcsin,cosh,tanh,sqrt
 import scipy as sp
 import scipy.sparse as sparse
 
+from mpl_polycollection import polyplot
+
 # use scipy instead:
 # import numba
 # @numba.njit()
@@ -202,6 +204,14 @@ l2_err = sum( area_b*(data_b-data_b_exact)**2 ) / sum(area_b)
 l2_err = sqrt(l2_err)
 print("norms of the pointwise error at cell centers:")
 print("vortex: relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
+
+
+# read in the cell polygons
+lat_b = mapf.variables['yv_b'][:,:]
+lon_b = mapf.variables['xv_b'][:,:]
+polyplot(lat_b,lon_b,data_b,'map_field.png')
+polyplot(lat_b,lon_b,data_b-data_b_exact,'map_error.png')
+
 
 
 mapf.close()
