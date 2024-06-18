@@ -16,13 +16,28 @@ fi
 type=uni
 name=$1
 
-
+#1deg = 113km
+#0.03 deg =  3.4km
+#0.025 deg = 2.8km
 
 if [ $name = NA1 ]; then
-  nlat=
-  nlon=
-  target=$WDIR/$name-${nlat}x${nlon}_SCRIP.nc
-  ncremap -G ttl='Equi-Angular North Atlantic grid1 3km'#latlon=30,90#snwe=55.0,85.0,-90.0,0.0#lat_typ=uni#lon_typ=grn_ctr \
-        -g $target
+    # 10x reduced, for plotting
+    nlat=80   # 24/.03=800
+    nlon=100  # 30/.03=1000
+    target=$WDIR/$name-${nlat}x${nlon}_SCRIP.nc
+    echo $target
+    ncremap  -g $target -G \
+       ttl='Equi-Angular North Atlantic grid1 3km'#latlon=$nlat,$nlon#snwe=22.0,46.0,-80.0,-50.0#lat_typ=uni#lon_typ=grn_ctr 
+    python plotscrip.py $target NA1
+
+    nlat=800   # 24/.03=800
+    nlon=1000  # 30/.03=1000
+    target=$WDIR/$name-${nlat}x${nlon}_SCRIP.nc
+    echo $target
+    ncremap  -g $target -G \
+      ttl='Equi-Angular North Atlantic grid1 3km'#latlon=$nlat,$nlon#snwe=22.0,46.0,-80.0,-50.0#lat_typ=uni#lon_typ=grn_ctr 
+
 fi
+
+
 

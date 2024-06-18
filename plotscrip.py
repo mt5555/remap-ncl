@@ -1,14 +1,27 @@
 import matplotlib
 import matplotlib.pyplot as plt
-import netCDF4 as nc
 import cartopy
 import cartopy.crs as ccrs
+import netCDF4 as nc
 import numpy as np
- 
+import sys
+
+if (len(sys.argv)>=2):
+    name=sys.argv[1]
+else:
+    name='TEMPEST_ne30pg2.scrip.nc'
+    print("no SCRIP file given. looking for TEMPEST_ne30pg2.scrip.nc")
+if (len(sys.argv)>=3):
+    region=sys.argv[2]
+else:
+    region='global'
+    print("no region given, using 'global'")
+
+
+
 # Load the data from the file
-data = nc.Dataset('/home/ac.mtaylor/scratch1/mapping/grids/NA1-x_SCRIP.nc')
-#data = nc.Dataset('/home/ac.mtaylor/scratch1/mapping/grids/TEMPEST_NE30pg3_scrip.nc')
-#data = nc.Dataset('/ascldap/users/mataylo/scratch1/mapping/grids/TEMPEST_ne30pg2.scrip.nc')
+data = nc.Dataset(name)
+
  
 # Extract the longitude and latitude arrays
 #grid_center_lon = data.variables['grid_center_lon'][:]
@@ -32,36 +45,42 @@ def remove_anti_meridian_polygons(lon_poly_coords, lat_poly_coords, eps=40):
 
 
  
-# Choose projection
-clat=40
-clon=-60
-proj = ccrs.PlateCarree()
-#proj = ccrs.Orthographic(central_latitude=clat, central_longitude=clon) 
-#proj = ccrs.Robinson()   
- 
-# Plot 1: Using lat/lon data directly
-ax = plt.axes(projection=proj)
-ax.set_global()
-#print("get_ext no argument: ",ax.get_extent())
-#print("get_ext with proj: ",ax.get_extent(crs=proj))
-#print("get_ext with latlon: ",ax.get_extent(crs=ccrs.PlateCarree()))
+# Choose projection and region
+if region=='global':
+    proj = ccrs.PlateCarree()
+    ax = plt.axes(projection=proj)
+    ax.set_global()
+
+if region=='global-robinson':
+    proj = ccrs.Robinson()
+    ax = plt.axes(projection=proj)
+    ax.set_global()
+
+if region=='NA1':
+    proj = ccrs.PlateCarree()
+    ax = plt.axes(projection=proj)
+    lonW = -110
+    lonE = 10
+    latS = 0
+    latN = 70
+    ax.set_extent([lonW, lonE, latS, latN])
+
+if region=='ortho':
+    clat=40
+    clon=-60
+    proj = ccrs.Orthographic(central_latitude=clat, central_longitude=clon) 
 
 
-#lonW = clon-40
-#lonE = clon+40
-#latS = clat-35
-#latN = clat+25
-#ax.set_extent([lonW, lonE, latS, latN])
+gl=ax.gridlines(linewidth=0.2,alpha=0.5)
+gl.left_labels = True
+gl.bottom_labels = True
 
-#ax.gridlines()
 #ax.coastlines(resolution='110m')
 ax.add_feature(cartopy.feature.OCEAN, zorder=0)
 #ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor='black')
 ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor='none')
 
 
-
- 
 # Plotting cell centers
 #ax.scatter(grid_center_lon, grid_center_lat, s=1, transform=ccrs.PlateCarree(), color='blue')
  
@@ -82,12 +101,13 @@ else:
     transformed_polygons = np.stack( (xpoly[:,:,0],xpoly[:,:,1]),axis=2)
 
 print("adding polycollection") 
-p = matplotlib.collections.PolyCollection(transformed_polygons, facecolor='none', edgecolor='black', alpha=1)
+p = matplotlib.collections.PolyCollection(transformed_polygons, facecolor='none',
+                                          edgecolor='black', linewidth=.1,alpha=1)
 ax.add_collection(p)
 
 #ax.set_title('grid cells')
-print("running show")
-plt.show()
+#print("running show")
+#plt.show()
 print("saving png")
-plt.savefig("scripcells.png") 
+plt.savefig("scripcells.png",dpi=1200) 
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # 
 #
-# makeSEtoFV.sh maptype name1 grid1 name2 grid2 
+# makeFVtoFV.sh maptype name1 grid1 name2 grid2 
 #
 # TR maptypes:  mono,bilin, delaunay, intbilin, intbilingb
 #
