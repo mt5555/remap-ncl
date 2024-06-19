@@ -55,10 +55,10 @@ grid2=ocean.oEC60to30v3.scrip.181106.nc
 #python ./vortex.py $wdir/maps/map_${name1}_to_${name2}_intbilingb.nc
 
 # ocn->atm
-python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin.nc
+#python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin.nc
 python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin_esmf.nc
 python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilin.nc
-python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilingb.nc
+#python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilingb.nc
 
 
 

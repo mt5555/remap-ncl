@@ -64,7 +64,17 @@ fi
 if [ ! -z $overlap_log ]; then    
     echo "OVERLAP mesh. log file in: $overlap_log"
     rm -f $overlap_log
-    if ! $exepath/GenerateOverlapMesh --a $grid1 --b $grid2  --out $overlap   >& $overlap_log ; then
+
+    grid1tmp=$grid1
+    grid2tmp=$grid2
+    if python ./isregional.py $grid2; then
+        echo "OVERLAP mesh: swapping mesh order"
+        grid1tmp=$grid2
+        grid2tmp=$grid1
+    fi
+
+    
+    if ! $exepath/GenerateOverlapMesh --a $grid1tmp --b $grid2tmp  --out $overlap   >& $overlap_log ; then
         echo "GenerateOverlapMesh failed"
         exit 1
     fi

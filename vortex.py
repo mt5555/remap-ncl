@@ -10,7 +10,7 @@ from numpy import sin,cos,arctan2,arcsin,cosh,tanh,sqrt
 import scipy as sp
 import scipy.sparse as sparse
 
-#from mpl_polycollection import polyplot
+from mpl_polycollection import polyplot
 
 # use scipy instead:
 # import numba
@@ -26,7 +26,7 @@ if len(os.sys.argv) < 2:
     print("./vortex.py mapfilename.nc")
     os.sys.exit(1)
 mapfile=(os.sys.argv[1])
-
+plotfile=mapfile.split(".nc")[0]
 
 
 #
@@ -161,7 +161,6 @@ data_b_exact=np.zeros(n_b)
 
 #testfield="y16_32"
 testfield="vortex"
-print("using testfield: ",testfield)
 data_a=test_fields(lon_a,lat_a,testfield)
 data_b_exact=test_fields(lon_b,lat_b,testfield)
 
@@ -213,7 +212,7 @@ max_err = max( abs(data_b-data_b_exact) ) / max( abs( data_b_exact ))
 l2_err = sum( area_b*(data_b-data_b_exact)**2 ) / sum(area_b)
 l2_err = sqrt(l2_err)
 print("norms of the pointwise error at cell centers:")
-print("vortex: relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
+print(testfield,": relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
 
 
 # read in the cell polygons
@@ -222,9 +221,6 @@ lon_b = mapf.variables['xv_b'][:,:]
 lat_b = lat_b[mask_b,:]
 lon_b = lon_b[mask_b,:]
 
-polyplot(lat_b,lon_b,data_b,'map_field.png')
-polyplot(lat_b,lon_b,data_b-data_b_exact,'map_error.png')
+polyplot(lat_b,lon_b,data_b,plotfile+'_field.png')
+polyplot(lat_b,lon_b,data_b-data_b_exact,plotfile+'_error.png')
 
-
-
-mapf.close()

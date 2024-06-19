@@ -21,9 +21,6 @@ name1=ne${NE}pg2
 grid1=TEMPEST_ne${NE}pg2.g
 grid1s=TEMPEST_ne${NE}pg2.scrip.nc
 
-# make overlap grid: regional grid needs to be first:
-./make_overlap.sh $name2 $grid2s $name1 $grid1
-
 
 ./makeFVtoFV.sh $mapalg $name1 $grid1s $name2  $grid2s  || exit 1
 map=$wdir/maps/map_${name1}_to_${name2}_${mapalg}.nc

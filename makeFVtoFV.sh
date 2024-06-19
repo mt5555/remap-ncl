@@ -92,15 +92,23 @@ if [[ $maptype == *"esmf"* ]]; then
         exit 1
     fi
 
-    echo "ESMF_RegridWeightGen: $maptype"
+    regarg=''
+    if python ./isregional.py $grid1; then
+        regarg="$regarg --src_regional"
+    fi
+    if python ./isregional.py $grid2; then
+        regarg="$regarg --dst_regional"
+    fi
+
+    echo "ESMF_RegridWeightGen: $maptype $regarg"
     ESMF_RegridWeightGen -d $grid2 -s $grid1  \
-                         --dst_regional $algarg --64bit_offset -w $map;
+                         $regarg $algarg --64bit_offset -w $map;
     if [ $? -ne 0 ]; then
         # try with extrapolation turned on:
         echo RegridWeightGen failed. Trying with extrapolation:
         ESMF_RegridWeightGen -d $grid2 -s $grid1   \
                    --extrap_method   nearestidavg \
-                   --dst_regional $algarg --64bit_offset -w $map
+                   $regarg  $algarg --64bit_offset -w $map
         if [ $? -ne 0 ]; then
             echo RegridWeightGen failed.
             exit 1

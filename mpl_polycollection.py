@@ -73,7 +73,7 @@ def polyplot(xlat,xlon,area,outname):
     
     matplotlib.pyplot.savefig(outname,dpi=dpi,orientation="portrait",bbox_inches='tight')
     end= time.time()
-    print(f"{end-start:.2f}s")
+    #print(f"{end-start:.2f}s")
     return 0
 
 
