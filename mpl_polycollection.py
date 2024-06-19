@@ -11,7 +11,7 @@ import cartopy.crs as ccrs
 import matplotlib
 from matplotlib import pyplot
 from matplotlib.collections import PolyCollection
-
+from math import pi
 
 def shift_anti_meridian_polygons(lon_poly_coords, lat_poly_coords, eps=40):
     """Shift polygons that are split on the anti-meridian for visualization
@@ -41,18 +41,26 @@ def shift_anti_meridian_polygons(lon_poly_coords, lat_poly_coords, eps=40):
 
 def polyplot(xlat,xlon,area,outname):
 
+    # convert to degrees, if necessary
+    if np.max(np.abs(xlat))<1.1*pi:
+        xlat=xlat*180/pi
+        xlon=xlon*180/pi
+
+
     mn=float(min(area))
     mx=float(max(area))
-    clev=(mn,mx)
     colormap='Spectral'
     print(f"poly_plot(): plotting {len(area)} cells. data min/max= {mn:.3},{mx:.3}")
+    mn=-.005
+    mx=.005
+    clev=(mn,mx)
     
     # center plot at lon=0,lat=0:
     proj=ccrs.PlateCarree()
     xpoly  = proj.transform_points(proj, xlon, xlat)
     
-    print("matplotlib/polycollection... ",end='')
-    dpi=600
+    #print("matplotlib/polycollection... ",end='')
+    dpi=1200
     start= time.time()
     
     # adjust cells into polycollection format:
@@ -65,7 +73,8 @@ def polyplot(xlat,xlon,area,outname):
     fig=matplotlib.pyplot.figure()
     ax = matplotlib.pyplot.axes(projection=proj)
     ax.set_global()
-    p = matplotlib.collections.PolyCollection(corners, array=area, edgecolor='face',alpha=1)
+    #p = matplotlib.collections.PolyCollection(corners, array=area, edgecolor='face',alpha=1)
+    p = matplotlib.collections.PolyCollection(corners, array=area, edgecolor='none',alpha=1)
     p.set_clim(clev)
     p.set_cmap(colormap)
     ax.add_collection(p)

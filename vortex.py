@@ -211,8 +211,7 @@ area_b=area_b[mask_b]
 max_err = max( abs(data_b-data_b_exact) ) / max( abs( data_b_exact ))
 l2_err = sum( area_b*(data_b-data_b_exact)**2 ) / sum(area_b)
 l2_err = sqrt(l2_err)
-print("norms of the pointwise error at cell centers:")
-print(testfield,": relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
+print(testfield,": pointwise relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
 
 
 # read in the cell polygons

@@ -29,6 +29,6 @@ if [ ! -f $map ]; then
     exit 1
 fi
 
-./vortex.py $map
+python ./vortex.py $map
 
 

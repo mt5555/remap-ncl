@@ -108,6 +108,8 @@ ax.add_collection(p)
 #ax.set_title('grid cells')
 #print("running show")
 #plt.show()
-print("saving png")
-plt.savefig("scripcells.png",dpi=1200) 
+outname=name.split(".nc")[0]
+outname=outname+".png"
+print("saving png:",outname)
+plt.savefig(outname,dpi=1200) 
 

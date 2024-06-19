@@ -50,34 +50,15 @@ grid2=ocean.oEC60to30v3.scrip.181106.nc
 
 # atm->ocn
 #python ./vortex.py $wdir/maps/map_${name1}_to_${name2}_bilin.nc
-#python ./vortex.py $wdir/maps/map_${name1}_to_${name2}_bilin_esmf.nc
+#python ./vortex.py $wdir/maps/map_${name1}_to_${name2}_bilin_esmf.nc   
 #python ./vortex.py $wdir/maps/map_${name1}_to_${name2}_intbilin.nc
 #python ./vortex.py $wdir/maps/map_${name1}_to_${name2}_intbilingb.nc
 
 # ocn->atm
-#python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin.nc
-python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin_esmf.nc
+python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin.nc
+python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin_esmf.nc    
 python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilin.nc
-#python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilingb.nc
+python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilingb.nc
 
-
-
-exit
-
-
-echo "===== generating test data for plots"
-./make_testdata.sh $name1   $grid1
-./make_testdata.sh $name2   $grid2
-
-# ncreamp + referror.py: 2min
-ncremap -5 -m $map  \
-        $wdir/testdata/${name1}_testdata.nc \
-        $wdir/testdata/${name2}_mapped.nc
-
-./referror.py vortex $wdir/testdata/${name2}_testdata.nc  $wdir/testdata/${name2}_mapped.nc
-#./referror.py Y2_2   $wdir/testdata/${name2}_testdata.nc  $wdir/testdata/${name2}_mapped.nc
-#./referror.py Y16_32 $wdir/testdata/${name2}_testdata.nc  $wdir/testdata/${name2}_mapped.nc 
-
-
-
+# ESMF: errors are much better, but it does not map data two partial cells
 

@@ -94,7 +94,7 @@ if [[ $maptype == *"esmf"* ]]; then
 
     regarg=''
     if python ./isregional.py $grid1; then
-        regarg="$regarg --src_regional"
+        regarg="$regarg --src_regional -i"
     fi
     if python ./isregional.py $grid2; then
         regarg="$regarg --dst_regional"
