@@ -1,6 +1,6 @@
 remap utilities
 
-a collection of scripts using NCO, ncremap and TempestRemap to
+a collection of scripts using python, NCO, ncremap and TempestRemap to
 create grids and mapping files
 
 SCRIP files:
@@ -13,8 +13,12 @@ mapping files:
 makeSEtoFV.sh
 makeFVtoFV.sh   
 makeFVtoSE.sh   (not finished)
-nco and esmf options?
+
+
 
 vortex.sh     give a mapping file, compute L2 and max error for the vortex analytic function
 
-
+isregiona.sh     return code = 0 if a grid is regional
+make_overlap.sh  TR overlap grid, called by mapping file scripts
+polyplot_mpl.sh  plot test functions, map error, using MPL's polycollection
+polyplot_hv.sh   plot test functions, map error, using holoviews
