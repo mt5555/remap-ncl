@@ -2,7 +2,7 @@
 # 
 # read map file, apply to vortex data, compute error
 #
-import os, numpy, time
+import os, time
 from netCDF4 import Dataset
 from math import pi
 import numpy as np
@@ -10,7 +10,7 @@ from numpy import sin,cos,arctan2,arcsin,cosh,tanh,sqrt
 import scipy as sp
 import scipy.sparse as sparse
 
-from mpl_polycollection import polyplot
+#from mpl_polycollection import polyplot
 
 # use scipy instead:
 # import numba
@@ -49,7 +49,7 @@ def RotatedSphereCoord(dLonC,dLatC,dLonT,dLatT):
     dZ = dSinC * dSinT + dCosC * dTrm;
     
     dLonT = arctan2(dY, dX);
-    dLonT += numpy.where(dLonT < 0,  2.0 * pi,0)
+    dLonT += np.where(dLonT < 0,  2.0 * pi,0)
 #    if dLonT < 0.0:
 #            dLonT += 2.0 * pi;
     dLatT = arcsin(dZ);
@@ -70,7 +70,7 @@ def vortex(dLon_in,dLat_in):
     dRho = dR0 * cos(dLat)
     dVt = 3.0 * sqrt(3) / 2.0  / cosh(dRho) / cosh(dRho) * tanh(dRho)
 
-    dOmega = numpy.where( dRho == 0, 0, dVt / dRho)
+    dOmega = np.where( dRho == 0, 0, dVt / dRho)
 #    if (dRho == 0.0):
 #        dOmega = 0.0
 #    else:
@@ -155,9 +155,9 @@ n_b = len(lat_b)
 
 
 
-data_a=numpy.zeros(n_a)
-data_b=numpy.zeros(n_b)
-data_b_exact=numpy.zeros(n_b)
+data_a=np.zeros(n_a)
+data_b=np.zeros(n_b)
+data_b_exact=np.zeros(n_b)
 
 #testfield="y16_32"
 testfield="vortex"
@@ -182,23 +182,33 @@ print("applying mapfile...")
 
 # fastest.  ne30np4_to_ne1024pg2:  0.42s
 #tic=time.perf_counter()
-data_b = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a)) @ data_a  # need scypi
+data2 = np.stack( (data_a, np.ones_like(data_a)), axis=1)  # combine into (m,2) matrix
+data_b2 = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a)) @ data2  # need scypi
+data_b=data_b2[:,0]
+mask_b=(data_b2[:,1] != 0)
 #toc=time.perf_counter()
 #print(f"apply map via sparse.coo_matrix: {toc - tic:0.4f} seconds")
 
 
 # # Fast, but not as fast as scypy:   0.61s
-# S=numpy.ma.getdata(S)
-# data_a=numpy.ma.getdata(data_a)
-# row=numpy.ma.getdata(row)
-# col=numpy.ma.getdata(col)
+# S=np.ma.getdata(S)
+# data_a=np.ma.getdata(data_a)
+# row=np.ma.getdata(row)
+# col=np.ma.getdata(col)
 # tic=time.perf_counter()
 # data_b=apply_map(data_a,S,row,col,n_b)
 # toc=time.perf_counter()
 # print(f"apply map via numba: {toc - tic:0.4f} seconds")
 
-    
+
+# remove points where map(1) == 0
+data_b=data_b[mask_b]
+data_b_exact=data_b_exact[mask_b]
+area_b=area_b[mask_b]
+
+
 # compute error between data_b and data_b_exact
+# only compute error where map(1) <> 0
 max_err = max( abs(data_b-data_b_exact) ) / max( abs( data_b_exact ))
 l2_err = sum( area_b*(data_b-data_b_exact)**2 ) / sum(area_b)
 l2_err = sqrt(l2_err)
@@ -209,6 +219,9 @@ print("vortex: relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
 # read in the cell polygons
 lat_b = mapf.variables['yv_b'][:,:]
 lon_b = mapf.variables['xv_b'][:,:]
+lat_b = lat_b[mask_b,:]
+lon_b = lon_b[mask_b,:]
+
 polyplot(lat_b,lon_b,data_b,'map_field.png')
 polyplot(lat_b,lon_b,data_b-data_b_exact,'map_error.png')
 
