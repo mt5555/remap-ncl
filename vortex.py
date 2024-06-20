@@ -234,6 +234,6 @@ plotpoly(lat_b,lon_b,data_b,plotfile+'_field.png')
 #plotpoly(lat_b,lon_b,data_b-data_b_exact,plotfile+'_error.png',colormap='Spectral')
 
 # error plot zoomed in over UK, with bounds specified
-plotpoly(lat_b,lon_b,data_b-data_b_exact,plotfile+'_error.png',clim=(-.02,.02),
+plotpoly(lat_b,lon_b,data_b-data_b_exact,plotfile+'_error.png',clim=(-.005,.005),
          colormap='Spectral',xlim=(-35,35),ylim=(10,80))
 
