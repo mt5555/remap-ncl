@@ -129,9 +129,12 @@ if [ ! -f $overlap ]; then
 fi
 
 # TR maptypes:  mono,bilin, delaunay, intbilin, intbilingb
+in_np=1
 case "$maptype" in
     mono)
         algarg="--correct_areas" ;;
+    fv2)
+        algarg="--correct_areas" ; in_np=2 ;;
     bilin)
         algarg="--method bilin --noconserve" ;;
     intbilin)
@@ -148,7 +151,7 @@ echo "GenerateOfflineMap: $maptype"
 echo "log file: $map_log"
 rm -f $map_log
 $exepath/GenerateOfflineMap --in_mesh $grid1  --out_mesh $grid2  --ov_mesh $overlap \
-                            --in_type fv --in_np 1  --out_type fv --out_np 1 \
+                            --in_type fv --in_np $in_np  --out_type fv --out_np 1 \
                             --out_double --out_format Netcdf4 \
                             $algarg  --out_map $map >& $map_log
 if [ ! -f $map ]; then

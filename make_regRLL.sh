@@ -26,19 +26,19 @@ name=$1
 if [ $name = NA1 ]; then
     # 10x reduced, for plotting
     nlat=80   # 24/.03=800
-    nlon=100  # 30/.03=1000
+    nlon=80
     target=$WDIR/$name-${nlat}x${nlon}_SCRIP.nc
     echo $target
     ncremap  -g $target -G \
-       ttl='Equi-Angular North Atlantic grid1 3km'#latlon=$nlat,$nlon#snwe=22.0,46.0,-80.0,-50.0#lat_typ=uni#lon_typ=grn_ctr 
+       ttl='Equi-Angular North Atlantic grid1 3km'#latlon=$nlat,$nlon#snwe=22.0,46.0,-80.0,-56.0#lat_typ=uni#lon_typ=grn_ctr 
     python plotscrip.py $target NA1
 
     nlat=800   # 24/.03=800
-    nlon=1000  # 30/.03=1000
+    nlon=800   # 30/.03=1000
     target=$WDIR/$name-${nlat}x${nlon}_SCRIP.nc
     echo $target
     ncremap  -g $target -G \
-      ttl='Equi-Angular North Atlantic grid1 3km'#latlon=$nlat,$nlon#snwe=22.0,46.0,-80.0,-50.0#lat_typ=uni#lon_typ=grn_ctr 
+      ttl='Equi-Angular North Atlantic grid1 3km'#latlon=$nlat,$nlon#snwe=22.0,46.0,-80.0,-56.0#lat_typ=uni#lon_typ=grn_ctr 
 
 fi
 

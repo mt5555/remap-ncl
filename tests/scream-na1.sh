@@ -13,7 +13,7 @@ mapalg=intbilin
 ./make_regRLL.sh NA1
 name2=NA1
 #grid2=no exodus file for RLL grids
-grid2s=NA1-800x1000_SCRIP.nc
+grid2s=NA1-800x800_SCRIP.nc
 
 NE=30
 ./makeSE.sh $NE
@@ -29,6 +29,6 @@ if [ ! -f $map ]; then
     exit 1
 fi
 
-python ./vortex.py $map
+python ./vortex.py $map y16_32
 
 
