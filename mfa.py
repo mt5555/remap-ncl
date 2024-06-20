@@ -10,17 +10,17 @@ import scipy.sparse as sparse
 from plotpoly_hv import plotpoly
 
 if len(os.sys.argv) < 3:
-    print("./mfa.py map_file_name.nc  map_type  [o2a_flux_map.nc] [domain.lnd.nc]")
+    print("./mfa.py map_type map_file_name.nc    [o2a_flux_map.nc] [domain.lnd.nc]")
     print("map_type=a2o, o2a, a2l, l2a, g2g")
     print("ocean->atm flux map (needed for a2o, o2a and l2a maps)")
     print("domain land file (land fraction, needed for l2a maps")
     os.sys.exit(1)
 
-mapfile=os.sys.argv[1]
-map_type=os.sys.argv[2]
+mapfile=os.sys.argv[2]
+map_type=os.sys.argv[1]
 
-mapf = Dataset(mapfile,"r")
 print("reading map: ",mapfile)
+mapf = Dataset(mapfile,"r")
 S=mapf.variables['S'][:]
 row=mapf.variables['row'][:]
 col=mapf.variables['col'][:]
@@ -28,23 +28,35 @@ row=row-1   # convert to zero indexing
 col=col-1
 n_a = len(mapf['xc_a'])  # removed [:]
 n_b = len(mapf['xc_b'])
-map_w= = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a))
+map_w = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a))
+
+# grid polygons
+lat_a = mapf.variables['yv_a'][:,:]
+lon_a = mapf.variables['xv_a'][:,:]
+area_a = mapf.variables['area_a'][:]
+
+lat_b = mapf.variables['yv_b'][:,:]
+lon_b = mapf.variables['xv_b'][:,:]
+area_b = mapf.variables['area_b'][:]
+
 mapf.close()
+
+
 
 have_o2a=False
 if len(os.sys.argv) >= 4:
     o2a_flux=os.sys.argv[3]
-    mapf = Dataset(o2a_flux,"r")
     print("reading o2a flux map: ",o2a_flux)
-    S=mapf.variables['S'][:]
-    row=mapf.variables['row'][:]
-    col=mapf.variables['col'][:]
+    fluxf = Dataset(o2a_flux,"r")
+    S=fluxf.variables['S'][:]
+    row=fluxf.variables['row'][:]
+    col=fluxf.variables['col'][:]
     row=row-1   # convert to zero indexing
     col=col-1
-    o2a_n_a = len(mapf['xc_a'])  # removed [:]
-    o2a_n_b = len(mapf['xc_b'])
-    o2a_map_w= = sparse.coo_matrix((S, (row,col)), shape=(o2a_n_b,o2a_n_a))
-    mapf.close()
+    o2a_n_a = len(fluxf['xc_a'])  # removed [:]
+    o2a_n_b = len(fluxf['xc_b'])
+    o2a_map_w = sparse.coo_matrix((S, (row,col)), shape=(o2a_n_b,o2a_n_a))
+    fluxf.close()
     have_o2a=True
     # compute oface_a  (ocean frac on atmosphere grid)
     # assumes MPAS grid which only contains ocean cells:
@@ -54,31 +66,78 @@ if len(os.sys.argv) >= 4:
 
 have_lfrin=False
 if len(os.sys.argv) >= 5:
-    domain_lnd=os.sys.argv[3]
+    domain_lnd=os.sys.argv[4]
     print("reading land domain file: ",domain_lnd)
     lfrin = Dataset(domain_lnd,"r").variables['mask'][:].flatten()
     have_lfrin=True
-    
+
 if map_type=='a2o':
-    if ! have_o2a:
+    if not have_o2a:
         print("Error: a2o map analysis requires o2a_flux map.")
         os.sys.exit(1)
 elif map_type=='o2a':
-    if ! have_o2a:
+    if not have_o2a:
         print("Error: o2a map analysis requires o2a_flux map.")
         os.sys.exit(1)
-elif map_type=='a2l' or map_type=='g2g':
-    # no dependencies
+#elif map_type=='a2l':
+#elif map_type=='g2g':
 elif map_type=='l2a':
-    if ! have_o2a:
+    if not have_o2a:
         print("Error: l2a map analysis requires o2a_flux map.")
         os.sys.exit(1)
-    if ! have_lfrin
+    if not have_lfrin:
         print("Error: l2a map analysis requires land domain file.")
         os.sys.exit(1)
 
 
+#######################################################################
+# row and col sums
+#######################################################################
+if map_typ=='o2a':
+    calc_rowsums(dst_frac=ofrac_a)
+else:
+    calc_rowsums()
+
+if map_type=='a2o':
+    calc_colsums(src_frac=ofrac_a)
+else:
+    calc_colsums()
+
+
+#######################################################################
+# fraction consistency error when mapping to atmosphere grid
+#######################################################################
+if map_type[2]=='a':
+    calc_frac_error()  max(ofrac_a) where map(ofrac)=0.
+    calc_frac_error()  max(1-ofrac_a) where map(lfrin)=0
+
+    
+#######################################################################
+# plot grids
+#######################################################################
+# plot source grid
+if map_type[0]='l' and have_lfrin:
+    plotgridarea("grid_a_area",lat_a,lon_a,area_a,lfrin)
+else:
+    plotgridarea("grid_a_area",lat_a,lon_a,area_a)
+# plot target grid
+if map_type[2]='l' and have_lfrin:
+    plotgridarea("grid_b_area",lat_b,lon_b,area_b,lfrin)
+else:
+    plotgridarea("grid_b_area",lat_b,lon_b,area_b)
+
+plot src test function
+plot mapped test function
+plot mapped test function error
+
+
+
+
+
+
         
+os.sys.exit(0)
+
 data_a=np.zeros(n_a)
 data_b=np.zeros(n_b)
 data_b_exact=np.zeros(n_b)
