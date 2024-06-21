@@ -41,7 +41,6 @@ area_b = mapf.variables['area_b'][:]
 
 mapf.close()
 
-
 have_o2a=False
 if len(os.sys.argv) >= 4:
     o2a_flux=os.sys.argv[3]
@@ -61,7 +60,6 @@ if len(os.sys.argv) >= 4:
     # assumes MPAS grid which only contains ocean cells:
     ofrac_a = o2a_map_w @ np.ones(o2a_n_a)
     # lfrac_a = 1-ofrac_a
-    
 
 have_lfrin=False
 if len(os.sys.argv) >= 5:
@@ -70,13 +68,38 @@ if len(os.sys.argv) >= 5:
     lfrin = Dataset(domain_lnd,"r").variables['mask'][:].flatten()
     have_lfrin=True
 
+Rearth_km = 6378.1                # radius of earth, in km
+sqrtarea=np.sqrt(area_a)*Rearth_km
+print("")
+print(f"src grid dx   min={np.min(sqrtarea):.2f}km max={np.max(sqrtarea):.2f}km n_a={n_a}")
+sqrtarea=np.sqrt(area_b)*Rearth_km
+print(f"dst grid dx   min={np.min(sqrtarea):.2f}km max={np.max(sqrtarea):.2f}km n_b={n_b}")
+if (have_o2a):
+    print(f"o2a flux map: n_a={o2a_n_a} n_b={o2a_n_b}")
+if (have_lfrin):
+    print(f"land domain file: n_a={len(lfrin)}")
+
+
+    
 if map_type=='a2o':
     if not have_o2a:
         print("Error: a2o map analysis requires o2a_flux map.")
         os.sys.exit(1)
+    if n_a != o2a_n_b:
+        print("Error: atmosphere grid does not match o2a_flux map.")
+        os.sys.exit(1)
+    if n_b != o2a_n_a:
+        print("Error: ocean grid does not match o2a_flux map.")
+        os.sys.exit(1)
 elif map_type=='o2a':
     if not have_o2a:
         print("Error: o2a map analysis requires o2a_flux map.")
+        os.sys.exit(1)
+    if n_b != o2a_n_b:
+        print("Error: atmosphere grid does not match o2a_flux map.")
+        os.sys.exit(1)
+    if n_a != o2a_n_a:
+        print("Error: ocean grid does not match o2a_flux map.")
         os.sys.exit(1)
 #elif map_type=='a2l':
 #elif map_type=='g2g':
@@ -87,6 +110,12 @@ elif map_type=='l2a':
     if not have_lfrin:
         print("Error: l2a map analysis requires land domain file.")
         os.sys.exit(1)
+    if n_b != o2a_n_b:
+        print("Error: atmosphere grid size does not match o2a_flux map.")
+        os.sys.exit(1)
+    if n_a != len(lfrin):
+        print("Error: land grid does not match domain.lnd grid.")
+        os.sys.exit(1)
 
 
 #######################################################################
@@ -95,23 +124,22 @@ elif map_type=='l2a':
 
 mn=np.min(map_w)
 mx=np.max(map_w)
-print(f"weights min={mn:.13f}  max={mx:.13f}")
+print(f"map weights:     min,max={mn:.13f} {mx:.13f}")
 
 tol=1e-8
 rowsums = sparse.coo_matrix.sum(map_w,axis=1)
-if map_typ=='o2a':
+if map_type=='o2a':
     partial=np.logical_and(ofrac_a>=0,ofrac_a<=(1-tol))
     mn_o=np.min(rowsums[ofrac_a>(1-tol)])
     mn_o=np.max(rowsums[ofrac_a>(1-tol)])
     mn_c=np.min(rowsums[partial])
     mn_c=np.max(rowsums[partial])
-    print(f"rowsums (ocean)    min={mn_o:.13f}  max={mn_o:.13f}")
-    print(f"rowsums (partial)  min={mn_c:.13f}  max={mn_c:.13f}")
-    print(f"ocean / partial ocean computed with tol={tol:.13f}")
+    print(f"rowsums(ocean)   min/max={mn_o:.13f} {mn_o:.13f} tol={tol:.1e}")
+    print(f"rowsums(partial) min/max={mn_c:.13f} {mn_c:.13f} tol={tol:.1e}")
 else:
     mn=np.min(rowsums)
     mx=np.max(rowsums)
-    print(f"rowsums  min={mn:.13f}  max={mn:.13f}")
+    print(f"rowsums                        min/max={mn:.13f} {mn:.13f}")
 
 colsums = map_w.T @ area_b  # should equal area_a
 colsums = colsums / area_a
@@ -121,13 +149,12 @@ if map_type=='a2o':
     mx_o=np.max(colsums[ofrac_a>(1-tol)])
     mn_c=np.min(colsums[partial])
     mx_c=np.max(colsums[partial])
-    print(f"area weighted colsums (ocean)    min={mn_o:.13f}  max={mn_o:.13f}")
-    print(f"area weighted colsums (partial)  min={mn_c:.13f}  max={mn_c:.13f}")
-    print(f"ocean / partial ocean computed with tol={tol:.13f}")
+    print(f"colsums(ocean)   min,max={mn_o:.13f} {mn_o:.13f} tol={tol:.1e}")
+    print(f"colsums(partial) min,max={mn_c:.13f} {mn_c:.13f} tol={tol:.1e}")
 else:
     mn=np.min(colsums)
     mx=np.max(colsums)
-    print(f"area weighted colsums  min={mn:.13f}  max={mx:.13f}")
+    print(f"colsums          min,max={mn:.13f} {mx:.13f}")
 
 
 #######################################################################
@@ -143,11 +170,18 @@ if map_type[2]=='a':
     else:
         frac_atm = map_w @ np.ones(o2a_n_a)
         frac_atm_flux=ofrac_a
-    zeroset_err = np.max( frac_atm_flux[ (frac_atm==0) ])
-    zeroset_count = len( frac_atm_flux[ (frac_atm==0) ] > .001)
-    print("zeroset-fractions: atm grid land/ocn fractions at points where map produces no data.  Should be zero")
-    print(f"zeroset-fraction max={zeroset_err:.13f}")
-    print(f"number of points with zeroset-fraction>.001): {zeroset_count:i}")
+    zeroset = frac_atm_flux[ (frac_atm==0) ]
+    zeroset_err = np.max(zeroset)
+    zeroset_count = sum(1 for x in (zeroset>0.001) if x) 
+    print(f"zeroset-fraction     max={zeroset_err:.13f} Num cells with err>.001={zeroset_count}")
+
+print("\nNote: "
+"Row sums should be 1, except for partial cells (if any) where they should be in [0,1]. "
+"Column sums are area weighted and area normalized.  For conservative maps, they should "
+"be 1, except for partial cells (if any) where they shoudl be in [0,1]. "
+"The zeroset-fraction metric gives the atm grid land/ocn fraction at points where atmosphere "
+"target maps produce no data.  Measures the error reconstructing fields on the atmosphere "
+"grid with sources from land and ocean.")
 
     
 #######################################################################
@@ -157,24 +191,26 @@ if importlib.util.find_spec("holoviews") is  None:
     print("cant load holoviews module, skipping plots.")
     os.sys.exit(0)
 
+os.sys.exit(0)
+    
 # plot source grid
-if map_type[0]='l' and have_lfrin:
+if map_type[0]=='l' and have_lfrin:
     plotgridarea("grid_a_area",lat_a,lon_a,area_a,lfrin)
 else:
     plotgridarea("grid_a_area",lat_a,lon_a,area_a)
 # plot target grid
-if map_type[2]='l' and have_lfrin:
+if map_type[2]=='l' and have_lfrin:
     plotgridarea("grid_b_area",lat_b,lon_b,area_b,lfrin)
 else:
     plotgridarea("grid_b_area",lat_b,lon_b,area_b)
 
-plot src test function
-plot mapped test function
-plot mapped test function error
+#plot src test function
+#plot mapped test function
+#plot mapped test function error
 
 
         
-os.sys.exit(0)
+
 
 data_a=np.zeros(n_a)
 data_b=np.zeros(n_b)
