@@ -2,12 +2,12 @@
 # 
 # read map file, apply to vortex data, compute error
 #
-import os, time
+import os, time, importlib
 from netCDF4 import Dataset
 import numpy as np
 import scipy.sparse as sparse
-
 from plotpoly_hv import plotpoly
+
 
 if len(os.sys.argv) < 3:
     print("./mfa.py map_type map_file_name.nc    [o2a_flux_map.nc] [domain.lnd.nc]")
@@ -16,8 +16,8 @@ if len(os.sys.argv) < 3:
     print("domain land file (land fraction, needed for l2a maps")
     os.sys.exit(1)
 
-mapfile=os.sys.argv[2]
 map_type=os.sys.argv[1]
+mapfile=os.sys.argv[2]
 
 print("reading map: ",mapfile)
 mapf = Dataset(mapfile,"r")
@@ -40,7 +40,6 @@ lon_b = mapf.variables['xv_b'][:,:]
 area_b = mapf.variables['area_b'][:]
 
 mapf.close()
-
 
 
 have_o2a=False
@@ -93,28 +92,71 @@ elif map_type=='l2a':
 #######################################################################
 # row and col sums
 #######################################################################
-if map_typ=='o2a':
-    calc_rowsums(dst_frac=ofrac_a)
-else:
-    calc_rowsums()
 
-if map_type=='a2o':
-    calc_colsums(src_frac=ofrac_a)
+mn=np.min(map_w)
+mx=np.max(map_w)
+print(f"weights min={mn:.13f}  max={mx:.13f}")
+
+tol=1e-8
+rowsums = sparse.coo_matrix.sum(map_w,axis=1)
+if map_typ=='o2a':
+    partial=np.logical_and(ofrac_a>=0,ofrac_a<=(1-tol))
+    mn_o=np.min(rowsums[ofrac_a>(1-tol)])
+    mn_o=np.max(rowsums[ofrac_a>(1-tol)])
+    mn_c=np.min(rowsums[partial])
+    mn_c=np.max(rowsums[partial])
+    print(f"rowsums (ocean)    min={mn_o:.13f}  max={mn_o:.13f}")
+    print(f"rowsums (partial)  min={mn_c:.13f}  max={mn_c:.13f}")
+    print(f"ocean / partial ocean computed with tol={tol:.13f}")
 else:
-    calc_colsums()
+    mn=np.min(rowsums)
+    mx=np.max(rowsums)
+    print(f"rowsums  min={mn:.13f}  max={mn:.13f}")
+
+colsums = map_w.T @ area_b  # should equal area_a
+colsums = colsums / area_a
+if map_type=='a2o':
+    partial=np.logical_and(ofrac_a>=tol,ofrac_a<=(1-tol))
+    mn_o=np.min(colsums[ofrac_a>(1-tol)])
+    mx_o=np.max(colsums[ofrac_a>(1-tol)])
+    mn_c=np.min(colsums[partial])
+    mx_c=np.max(colsums[partial])
+    print(f"area weighted colsums (ocean)    min={mn_o:.13f}  max={mn_o:.13f}")
+    print(f"area weighted colsums (partial)  min={mn_c:.13f}  max={mn_c:.13f}")
+    print(f"ocean / partial ocean computed with tol={tol:.13f}")
+else:
+    mn=np.min(colsums)
+    mx=np.max(colsums)
+    print(f"area weighted colsums  min={mn:.13f}  max={mx:.13f}")
 
 
 #######################################################################
 # fraction consistency error when mapping to atmosphere grid
+# also compute zero-set consistency with fractions:
+# error = largest frac_atm_flux (fraction defined by flux map) where
+# map_w produces no data
 #######################################################################
 if map_type[2]=='a':
-    calc_frac_error()  max(ofrac_a) where map(ofrac)=0.
-    calc_frac_error()  max(1-ofrac_a) where map(lfrin)=0
+    if map_type[0]=='l':
+        frac_atm = map_w @ lfrin
+        frac_atm_flux=1-ofrac_a
+    else:
+        frac_atm = map_w @ np.ones(o2a_n_a)
+        frac_atm_flux=ofrac_a
+    zeroset_err = np.max( frac_atm_flux[ (frac_atm==0) ])
+    zeroset_count = len( frac_atm_flux[ (frac_atm==0) ] > .001)
+    print("zeroset-fractions: atm grid land/ocn fractions at points where map produces no data.  Should be zero")
+    print(f"zeroset-fraction max={zeroset_err:.13f}")
+    print(f"number of points with zeroset-fraction>.001): {zeroset_count:i}")
 
     
 #######################################################################
 # plot grids
 #######################################################################
+if importlib.util.find_spec("holoviews") is  None:
+    print("cant load holoviews module, skipping plots.")
+    os.sys.exit(0)
+
 # plot source grid
 if map_type[0]='l' and have_lfrin:
     plotgridarea("grid_a_area",lat_a,lon_a,area_a,lfrin)
@@ -129,10 +171,6 @@ else:
 plot src test function
 plot mapped test function
 plot mapped test function error
-
-
-
-
 
 
         
