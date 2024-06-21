@@ -7,6 +7,7 @@ from netCDF4 import Dataset
 import numpy as np
 import scipy.sparse as sparse
 from plotpoly_hv import plotpoly
+from test_fields import test_fields
 
 
 if len(os.sys.argv) < 3:
@@ -30,16 +31,9 @@ n_a = len(mapf['xc_a'])  # removed [:]
 n_b = len(mapf['xc_b'])
 map_w = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a))
 
-# grid polygons
-lat_a = mapf.variables['yv_a'][:,:]
-lon_a = mapf.variables['xv_a'][:,:]
 area_a = mapf.variables['area_a'][:]
-
-lat_b = mapf.variables['yv_b'][:,:]
-lon_b = mapf.variables['xv_b'][:,:]
 area_b = mapf.variables['area_b'][:]
 
-mapf.close()
 
 have_o2a=False
 if len(os.sys.argv) >= 4:
@@ -184,6 +178,39 @@ print("\nNote: "
 "grid with sources from land and ocean.")
 
     
+
+#######################################################################
+# mapping error
+#######################################################################
+# grid centers
+lat_a = mapf.variables['yc_a'][:]
+lon_a = mapf.variables['xc_a'][:]
+lat_b = mapf.variables['yc_b'][:]
+lon_b = mapf.variables['xc_b'][:]
+
+data_a=test_fields(lon_a,lat_a,"y16_32")
+data_b_exact=test_fields(lon_b,lat_b,"y16_32")
+data2 = np.stack( (data_a, np.ones_like(data_a)), axis=1)  # combine into (m,2) matrix
+data_b2 = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a)) @ data2  # need scypi
+data_b=data_b2[:,0]
+mask_b=(data_b2[:,1] != 0)
+
+# remove points where map(1) == 0
+# devide by map(1) to compute correct error:
+data_b2=data_b[mask_b] / data_b2[mask_b,1]
+data_b_exact2=data_b_exact[mask_b]
+area_b2=area_b[mask_b]
+
+
+# compute error between data_b and data_b_exact
+# only compute error where map(1) <> 0
+max_err = max( abs(data_b2-data_b_exact2) ) / max( abs( data_b_exact2 ))
+l2_err = sum( area_b2*(data_b2-data_b_exact2)**2 ) / sum(area_b2)
+l2_err = np.sqrt(l2_err)
+print("Y16_32 pointwise relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
+
+
+
 #######################################################################
 # plot grids
 #######################################################################
@@ -191,55 +218,26 @@ if importlib.util.find_spec("holoviews") is  None:
     print("cant load holoviews module, skipping plots.")
     os.sys.exit(0)
 
-os.sys.exit(0)
+# grid polygons
+lat_a = mapf.variables['yv_a'][:,:]
+lon_a = mapf.variables['xv_a'][:,:]
+lat_b = mapf.variables['yv_b'][:,:]
+lon_b = mapf.variables['xv_b'][:,:]
+
     
 # plot source grid
 if map_type[0]=='l' and have_lfrin:
-    plotgridarea("grid_a_area",lat_a,lon_a,area_a,lfrin)
+    plotpoly(lat_a,lon_a,Rearth_km*np.sqrt(area_a),"srcgrid-dx.png",title="resolution (km)",mask=lfrin)
 else:
-    plotgridarea("grid_a_area",lat_a,lon_a,area_a)
+    plotpoly(lat_a,lon_a,Rearth_km*np.sqrt(area_a),"srcgrid-dx.png",title="resolution (km)")
 # plot target grid
 if map_type[2]=='l' and have_lfrin:
-    plotgridarea("grid_b_area",lat_b,lon_b,area_b,lfrin)
+    plotpoly(lat_b,lon_b,Rearth_km*np.sqrt(area_b),"dstgrid-dx.png",title="resolution (km)",mask=lfrin)    
 else:
-    plotgridarea("grid_b_area",lat_b,lon_b,area_b)
+    plotpoly(lat_b,lon_b,Rearth_km*np.sqrt(area_b),"dstgrid-dx.png",title="resolution (km)")
 
-#plot src test function
-#plot mapped test function
-#plot mapped test function error
+plotpoly(lat_b,lon_b,data_b,"ma_field.png",title="mapped Y16_32",mask=mask_b)
+error=data_b_exact-data_b
+plotpoly(lat_b,lon_b,error,"map_error.png",title="Y16_32 map error",mask=mask_b)
 
-
-        
-
-
-data_a=np.zeros(n_a)
-data_b=np.zeros(n_b)
-data_b_exact=np.zeros(n_b)
-
-data_a=test_fields(lon_a,lat_a,testfield)
-data_b_exact=test_fields(lon_b,lat_b,testfield)
-
-
-
-    
-print("applying mapfile...")
-
-data2 = np.stack( (data_a, np.ones_like(data_a)), axis=1)  # combine into (m,2) matrix
-data_b2 = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a)) @ data2  # need scypi
-data_b=data_b2[:,0]
-mask_b=(data_b2[:,1] != 0)
-
-
-
-data_b=data_b[mask_b] / data_b2[mask_b,1]
-data_b_exact=data_b_exact[mask_b]
-area_b=area_b[mask_b]
-
-
-# compute error between data_b and data_b_exact
-# only compute error where map(1) <> 0
-max_err = max( abs(data_b-data_b_exact) ) / max( abs( data_b_exact ))
-l2_err = sum( area_b*(data_b-data_b_exact)**2 ) / sum(area_b)
-l2_err = sqrt(l2_err)
-print(testfield,": pointwise relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
 
