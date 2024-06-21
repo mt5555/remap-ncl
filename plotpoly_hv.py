@@ -128,7 +128,7 @@ def plotpoly(lat_poly_coords, lon_poly_coords, data, filepath=None, title='',
     if (colormap==None):
         colormap='Plasma'
 
-    print(f"poly_plot(): plotting {len(data)} cells. data min/max= {mn:.3},{mx:.3}")
+    print(f"plotpoly(): plotting {len(data)} cells. data min/max= {mn:.3},{mx:.3} {title}")
 
     # center at lat=lon=0
     xlon  = proj.transform_points(ccrs.PlateCarree(), lon_poly_coords,lat_poly_coords)
