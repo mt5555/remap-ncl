@@ -14,7 +14,7 @@
 
 #ne256 trigrid with speckling:m
 #wdir="/sems-data-store/ACME/inputdata"  #mappy
-wdir="lcrc/group/e3sm/data/inputdata"   #anvil
+wdir="/lcrc/group/e3sm/data/inputdata"   #anvil
 python mfa.py l2a \
        $wdir/cpl/gridmaps/ne256pg2/map_r0125_to_ne256pg2_bilin.200212.nc \
        $wdir/cpl/gridmaps/ne256pg2/map_oRRS18to6v3_to_ne256pg2_nco.200212.nc \

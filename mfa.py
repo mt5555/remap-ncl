@@ -62,12 +62,23 @@ if len(os.sys.argv) >= 5:
     lfrin = Dataset(domain_lnd,"r").variables['mask'][:].flatten()
     have_lfrin=True
 
+print("")
 Rearth_km = 6378.1                # radius of earth, in km
 sqrtarea=np.sqrt(area_a)*Rearth_km
-print("")
-print(f"src grid dx   min={np.min(sqrtarea):.2f}km max={np.max(sqrtarea):.2f}km n_a={n_a}")
+tot_area_a=sum(area_a)/(4*np.pi)
+if tot_area_a < 1.1:    # some bilin maps have garbage in area
+    print(f"src grid dx   min={np.min(sqrtarea):.2f}km max={np.max(sqrtarea):.2f}km"
+          f" area/4pi={tot_area_a:.3f} n_a={n_a}")
+else:
+    print(f"src grid (bad area)  n_a={n_a}")
+
 sqrtarea=np.sqrt(area_b)*Rearth_km
-print(f"dst grid dx   min={np.min(sqrtarea):.2f}km max={np.max(sqrtarea):.2f}km n_b={n_b}")
+tot_area_b=sum(area_b)/(4*np.pi)
+if tot_area_b < 1.1:  # some bilin maps have garbage in area
+    print(f"dst grid dx   min={np.min(sqrtarea):.2f}km max={np.max(sqrtarea):.2f}km"
+          f" area/4pi={tot_area_b:.3f} n_b={n_b}")
+else:
+    print(f"dst grid (bad area)   n_b={n_b}")
 if (have_o2a):
     print(f"o2a flux map: n_a={o2a_n_a} n_b={o2a_n_b}")
 if (have_lfrin):
@@ -133,7 +144,7 @@ if map_type=='o2a':
 else:
     mn=np.min(rowsums)
     mx=np.max(rowsums)
-    print(f"rowsums                        min/max={mn:.13f} {mn:.13f}")
+    print(f"rowsums          min/max={mn:.13f} {mn:.13f}")
 
 colsums = map_w.T @ area_b  # should equal area_a
 colsums = colsums / area_a
@@ -177,7 +188,10 @@ print("\nNote: "
 "target maps produce no data.  Measures the error reconstructing fields on the atmosphere "
 "grid with sources from land and ocean.")
 
-    
+
+if tot_area_b>1.1:    
+    print("Error processing area_b, skipping mapping Y16_32 error calculation.")
+    os.sys.exit(1)
 
 #######################################################################
 # mapping error
@@ -226,15 +240,17 @@ lon_b = mapf.variables['xv_b'][:,:]
 
     
 # plot source grid
-if map_type[0]=='l' and have_lfrin:
-    plotpoly(lat_a,lon_a,Rearth_km*np.sqrt(area_a),"srcgrid-dx.png",title="resolution (km)",mask=lfrin)
-else:
-    plotpoly(lat_a,lon_a,Rearth_km*np.sqrt(area_a),"srcgrid-dx.png",title="resolution (km)")
+if tot_area_a<1.1:
+    if map_type[0]=='l' and have_lfrin:
+        plotpoly(lat_a,lon_a,Rearth_km*np.sqrt(area_a),"srcgrid-dx.png",title="resolution (km)",mask=lfrin)
+    else:
+        plotpoly(lat_a,lon_a,Rearth_km*np.sqrt(area_a),"srcgrid-dx.png",title="resolution (km)")
 # plot target grid
-if map_type[2]=='l' and have_lfrin:
-    plotpoly(lat_b,lon_b,Rearth_km*np.sqrt(area_b),"dstgrid-dx.png",title="resolution (km)",mask=lfrin)    
-else:
-    plotpoly(lat_b,lon_b,Rearth_km*np.sqrt(area_b),"dstgrid-dx.png",title="resolution (km)")
+if tot_area_b<1.1:
+    if map_type[2]=='l' and have_lfrin:
+        plotpoly(lat_b,lon_b,Rearth_km*np.sqrt(area_b),"dstgrid-dx.png",title="resolution (km)",mask=lfrin)    
+    else:
+        plotpoly(lat_b,lon_b,Rearth_km*np.sqrt(area_b),"dstgrid-dx.png",title="resolution (km)")
 
 plotpoly(lat_b,lon_b,data_b,"ma_field.png",title="mapped Y16_32",mask=mask_b)
 error=data_b_exact-data_b
