@@ -207,7 +207,7 @@ data_b_exact=test_fields(lon_b,lat_b,"y16_32")
 data2 = np.stack( (data_a, np.ones_like(data_a)), axis=1)  # combine into (m,2) matrix
 data_b2 = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a)) @ data2  # need scypi
 data_b=data_b2[:,0]
-mask_b=(data_b2[:,1] != 0)
+mask_b=data_b2[:,1] != 0
 
 # remove points where map(1) == 0
 # devide by map(1) to compute correct error:
