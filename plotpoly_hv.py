@@ -121,7 +121,7 @@ def plotpoly(lat_poly_coords, lon_poly_coords, data, filepath=None, title='',
         data=data[mask]
         lon_poly_coords = lon_poly_coords[mask,:]
         lat_poly_coords = lat_poly_coords[mask,:]
-    
+        #count = sum(1 for x in mask if x)
 
     mn=float(min(data))
     mx=float(max(data))

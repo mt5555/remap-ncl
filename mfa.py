@@ -62,6 +62,14 @@ if len(os.sys.argv) >= 5:
     lfrin = Dataset(domain_lnd,"r").variables['mask'][:].flatten()
     have_lfrin=True
 
+print("\nNote: "
+"Row sums should be 1, except for partial cells (if any) where they should be in [0,1]. "
+"Column sums are area weighted and area normalized.  For conservative maps, they should "
+"be 1, except for partial cells (if any) where they shoudl be in [0,1]. "
+"The zeroset-fraction metric gives the atm grid land/ocn fraction at points where atmosphere "
+"target maps produce no data.  Measures the error reconstructing fields on the atmosphere "
+"grid with sources from land and ocean.")
+
 print("")
 Rearth_km = 6378.1                # radius of earth, in km
 sqrtarea=np.sqrt(area_a)*Rearth_km
@@ -84,7 +92,10 @@ if (have_o2a):
 if (have_lfrin):
     print(f"land domain file: n_a={len(lfrin)}")
 
-
+src_mask=1
+dst_mask=1
+if have_lfrin and map_type[0]=='l': src_mask=lfrin
+if have_lfrin and map_type[2]=='l': dst_mask=lfrin
     
 if map_type=='a2o':
     if not have_o2a:
@@ -178,15 +189,8 @@ if map_type[2]=='a':
     zeroset = frac_atm_flux[ (frac_atm==0) ]
     zeroset_err = np.max(zeroset)
     zeroset_count = sum(1 for x in (zeroset>0.001) if x) 
-    print(f"zeroset-fraction     max={zeroset_err:.13f} Num cells with err>.001={zeroset_count}")
+    print(f"zeroset-fraction     max={zeroset_err:.13f} ({zeroset_count} cells have err>.001)")
 
-print("\nNote: "
-"Row sums should be 1, except for partial cells (if any) where they should be in [0,1]. "
-"Column sums are area weighted and area normalized.  For conservative maps, they should "
-"be 1, except for partial cells (if any) where they shoudl be in [0,1]. "
-"The zeroset-fraction metric gives the atm grid land/ocn fraction at points where atmosphere "
-"target maps produce no data.  Measures the error reconstructing fields on the atmosphere "
-"grid with sources from land and ocean.")
 
 
 if tot_area_b>1.1:    
@@ -204,24 +208,53 @@ lon_b = mapf.variables['xc_b'][:]
 
 data_a=test_fields(lon_a,lat_a,"y16_32")
 data_b_exact=test_fields(lon_b,lat_b,"y16_32")
-data2 = np.stack( (data_a, np.ones_like(data_a)), axis=1)  # combine into (m,2) matrix
-data_b2 = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a)) @ data2  # need scypi
+data2 = np.stack( (src_mask*data_a, src_mask*np.ones_like(data_a)), axis=1)  # combine into (m,2) matrix
+data_b2 = map_w @ data2
 data_b=data_b2[:,0]
 mask_b=data_b2[:,1] != 0
+data_b[mask_b]=data_b[mask_b] / data_b2[mask_b,1]
 
-# remove points where map(1) == 0
-# devide by map(1) to compute correct error:
-data_b2=data_b[mask_b] / data_b2[mask_b,1]
+data_b2=data_b[mask_b]
 data_b_exact2=data_b_exact[mask_b]
 area_b2=area_b[mask_b]
 
 
-# compute error between data_b and data_b_exact
-# only compute error where map(1) <> 0
-max_err = max( abs(data_b2-data_b_exact2) ) / max( abs( data_b_exact2 ))
-l2_err = sum( area_b2*(data_b2-data_b_exact2)**2 ) / sum(area_b2)
-l2_err = np.sqrt(l2_err)
-print("Y16_32 pointwise relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
+# compute mapping error between data_b and data_b_exact
+# only at cells where mask_b=True, possibly split into full and partial fraction cells
+if map_type[2]=='a':
+    if map_type[0]=='o': frac=ofrac_a
+    if map_type[0]=='l': frac=1-ofrac_a
+    # compute error over full cells:   
+    mask_full=(frac[mask_b]>(1-tol))
+    mask_partial=1-mask_full
+
+    data_b3=data_b2[mask_full]
+    data_b_exact3=data_b_exact2[mask_full]
+    area_b3=area_b2[mask_full]
+    max_err = max( abs(data_b3-data_b_exact3) ) / max( abs( data_b_exact3 ))
+    l2_err = sum( area_b3*(data_b3-data_b_exact3)**2 ) / sum(area_b3)
+    l2_err = np.sqrt(l2_err)
+    print("Y16_32 pointwise relative error, full cells:     l2=%.3e  max=%.3e" % (l2_err,max_err))
+    # set data range for error plot based on interior cells
+    mx = max( abs(data_b3-data_b_exact3) ) 
+    clim_error=(-mx,mx)
+
+
+    data_b3=data_b2[mask_partial]
+    data_b_exact3=data_b_exact2[mask_partial]
+    area_b3=area_b2[mask_partial]
+    max_err = max( abs(data_b3-data_b_exact3) ) / max( abs( data_b_exact3 ))
+    l2_err = sum( area_b3*(data_b3-data_b_exact3)**2 ) / sum(area_b3)
+    l2_err = np.sqrt(l2_err)
+    print("Y16_32 pointwise relative error, partial cells:  l2=%.3e  max=%.3e" % (l2_err,max_err))
+
+else:
+    max_err = max( abs(data_b2-data_b_exact2) ) / max( abs( data_b_exact2 ))
+    l2_err = sum( area_b2*(data_b2-data_b_exact2)**2 ) / sum(area_b2)
+    l2_err = np.sqrt(l2_err)
+    print("Y16_32 pointwise relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
+    mx = max( abs(data_b2-data_b_exact2) ) 
+    clim_error=(-mx,mx)
 
 
 
@@ -238,22 +271,17 @@ lon_a = mapf.variables['xv_a'][:,:]
 lat_b = mapf.variables['yv_b'][:,:]
 lon_b = mapf.variables['xv_b'][:,:]
 
-    
 # plot source grid
 if tot_area_a<1.1:
-    if map_type[0]=='l' and have_lfrin:
-        plotpoly(lat_a,lon_a,Rearth_km*np.sqrt(area_a),"srcgrid-dx.png",title="resolution (km)",mask=lfrin)
-    else:
-        plotpoly(lat_a,lon_a,Rearth_km*np.sqrt(area_a),"srcgrid-dx.png",title="resolution (km)")
+    plotpoly(lat_a,lon_a,Rearth_km*np.sqrt(area_a),"srcgrid-dx.png",title="resolution (km)",mask=src_mask)
 # plot target grid
 if tot_area_b<1.1:
-    if map_type[2]=='l' and have_lfrin:
-        plotpoly(lat_b,lon_b,Rearth_km*np.sqrt(area_b),"dstgrid-dx.png",title="resolution (km)",mask=lfrin)    
-    else:
-        plotpoly(lat_b,lon_b,Rearth_km*np.sqrt(area_b),"dstgrid-dx.png",title="resolution (km)")
+    plotpoly(lat_b,lon_b,Rearth_km*np.sqrt(area_b),"dstgrid-dx.png",title="resolution (km)",mask=dst_mask)    
 
-plotpoly(lat_b,lon_b,data_b,"ma_field.png",title="mapped Y16_32",mask=mask_b)
+plotpoly(lat_b,lon_b,data_b,"map_field.png",title="mapped Y16_32",mask=mask_b)
 error=data_b_exact-data_b
-plotpoly(lat_b,lon_b,error,"map_error.png",title="Y16_32 map error",mask=mask_b)
+plotpoly(lat_b,lon_b,error,"map_error.png",title="Y16_32 map error",clim=clim_error,
+colormap='Spectral',mask=mask_b)
 
-
+#default colormap is Plasma (i like it better than Viradis)
+#Spectral is a good diverging colrmap. more interesting than RdBu
