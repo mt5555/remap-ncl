@@ -221,18 +221,21 @@ area_b2=area_b[mask_b]
 
 # compute mapping error between data_b and data_b_exact
 # only at cells where mask_b=True, possibly split into full and partial fraction cells
+max_normalization=max(abs(data_b_exact2))
+l2_normalization=sum( area_b2*data_b_exact2**2) / sum(area_b2)
+                      
 if map_type[2]=='a':
     if map_type[0]=='o': frac=ofrac_a
     if map_type[0]=='l': frac=1-ofrac_a
     # compute error over full cells:   
     mask_full=(frac[mask_b]>(1-tol))
-    mask_partial=1-mask_full
+    mask_partial=~mask_full
 
     data_b3=data_b2[mask_full]
     data_b_exact3=data_b_exact2[mask_full]
     area_b3=area_b2[mask_full]
-    max_err = max( abs(data_b3-data_b_exact3) ) / max( abs( data_b_exact3 ))
-    l2_err = sum( area_b3*(data_b3-data_b_exact3)**2 ) / sum(area_b3)
+    max_err = max( abs(data_b3-data_b_exact3) )       / max_normalization
+    l2_err = sum( area_b3*(data_b3-data_b_exact3)**2 ) / sum(area_b3) / l2_normalization
     l2_err = np.sqrt(l2_err)
     print("Y16_32 pointwise relative error, full cells:     l2=%.3e  max=%.3e" % (l2_err,max_err))
     # set data range for error plot based on interior cells
@@ -243,14 +246,14 @@ if map_type[2]=='a':
     data_b3=data_b2[mask_partial]
     data_b_exact3=data_b_exact2[mask_partial]
     area_b3=area_b2[mask_partial]
-    max_err = max( abs(data_b3-data_b_exact3) ) / max( abs( data_b_exact3 ))
-    l2_err = sum( area_b3*(data_b3-data_b_exact3)**2 ) / sum(area_b3)
+    max_err = max( abs(data_b3-data_b_exact3) )  / max_normalization
+    l2_err = sum( area_b3*(data_b3-data_b_exact3)**2 ) / sum(area_b3) / l2_normalization
     l2_err = np.sqrt(l2_err)
     print("Y16_32 pointwise relative error, partial cells:  l2=%.3e  max=%.3e" % (l2_err,max_err))
 
 else:
-    max_err = max( abs(data_b2-data_b_exact2) ) / max( abs( data_b_exact2 ))
-    l2_err = sum( area_b2*(data_b2-data_b_exact2)**2 ) / sum(area_b2)
+    max_err = max( abs(data_b2-data_b_exact2) )        / max_normalization
+    l2_err = sum( area_b2*(data_b2-data_b_exact2)**2 ) / sum(area_b2) / l2_normalization
     l2_err = np.sqrt(l2_err)
     print("Y16_32 pointwise relative error l2=%.3e  max=%.3e" % (l2_err,max_err))
     mx = max( abs(data_b2-data_b_exact2) ) 

@@ -10,16 +10,16 @@ mkdir $wdir/grids
 mkdir $wdir/maps
 
 # V2
-#ocnname=oEC60to30v3
-#ocnfile=ocean.oEC60to30v3.scrip.181106.nc
-#atmname=ne30pg2
-#atmfile=TEMPEST_ne30pg2.scrip.nc
+ocnname=oEC60to30v3
+ocnfile=ocean.oEC60to30v3.scrip.181106.nc
+atmname=ne30pg2
+atmfile=TEMPEST_ne30pg2.scrip.nc
 
 # V3
-ocnfile=ocean.IcoswISC30E3r5.nomask.scrip.20231120.nc
-ocnname=IcoswISC30E3r5
-atmname=ne120pg2
-atmfile=TEMPEST_ne120pg2.scrip.nc
+#ocnfile=ocean.IcoswISC30E3r5.nomask.scrip.20231120.nc
+#ocnname=IcoswISC30E3r5
+#atmname=ne120pg2
+#atmfile=TEMPEST_ne120pg2.scrip.nc
 
 
             
@@ -56,13 +56,18 @@ grid2=${ocnfile}
 #python ./vortex.py $wdir/maps/map_${name1}_to_${name2}_intbilingb.nc    y16_32
 
 # ocn->atm
-python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_fv2.nc          y16_32
-python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_mono.nc          y16_32
-python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin.nc         y16_32
-python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin_esmf.nc    y16_32
-python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilin.nc      y16_32
-python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilingb.nc    y16_32
+#python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_fv2.nc          y16_32
+#python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_mono.nc          y16_32
+#python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin.nc         y16_32
+#python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_bilin_esmf.nc    y16_32
+#python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilin.nc      y16_32
+#python ./vortex.py $wdir/maps/map_${name2}_to_${name1}_intbilingb.nc    y16_32
 
+python ./mfa.py o2a $wdir/maps/map_${name2}_to_${name1}_mono.nc   $wdir/maps/map_${name2}_to_${name1}_mono.nc
+python ./mfa.py o2a $wdir/maps/map_${name2}_to_${name1}_fv2.nc   $wdir/maps/map_${name2}_to_${name1}_mono.nc
+python ./mfa.py o2a $wdir/maps/map_${name2}_to_${name1}_bilin_esmf.nc   $wdir/maps/map_${name2}_to_${name1}_mono.nc
+python ./mfa.py o2a $wdir/maps/map_${name2}_to_${name1}_bilin.nc   $wdir/maps/map_${name2}_to_${name1}_mono.nc
+python ./mfa.py o2a $wdir/maps/map_${name2}_to_${name1}_intbilin.nc   $wdir/maps/map_${name2}_to_${name1}_mono.nc
 
 # ESMF: errors are much better, but it does not map data two partial cells
 
