@@ -137,14 +137,15 @@ elif map_type=='l2a':
 #######################################################################
 # row and col sums
 #######################################################################
-
+tol=1e-8
 mn=np.min(map_w)
 mx=np.max(map_w)
 print(f"map weights:     min,max={mn:.13f} {mx:.13f}")
 
-tol=1e-8
-rowsums = sparse.coo_matrix.sum(map_w,axis=1)
-if map_type=='o2a':
+
+rowsums = sparse.coo_matrix.sum(map_w,axis=1)    
+if map_type[2]=='o2a':
+    # no need to do this for l2a maps, since they are global and we assume lfrin=[0,1]
     partial=np.logical_and(ofrac_a>=0,ofrac_a<=(1-tol))
     mn_o=np.min(rowsums[ofrac_a>(1-tol)])
     mn_o=np.max(rowsums[ofrac_a>(1-tol)])
@@ -157,20 +158,23 @@ else:
     mx=np.max(rowsums)
     print(f"rowsums          min/max={mn:.13f} {mn:.13f}")
 
-colsums = map_w.T @ area_b  # should equal area_a
-colsums = colsums / area_a
-if map_type=='a2o':
-    partial=np.logical_and(ofrac_a>=tol,ofrac_a<=(1-tol))
-    mn_o=np.min(colsums[ofrac_a>(1-tol)])
-    mx_o=np.max(colsums[ofrac_a>(1-tol)])
-    mn_c=np.min(colsums[partial])
-    mx_c=np.max(colsums[partial])
-    print(f"colsums(ocean)   min,max={mn_o:.13f} {mn_o:.13f} tol={tol:.1e}")
-    print(f"colsums(partial) min,max={mn_c:.13f} {mn_c:.13f} tol={tol:.1e}")
+if tot_area_a>1.1 or tot_area_b>1.1:
+    print("skipping colsums due to bad area data")
 else:
-    mn=np.min(colsums)
-    mx=np.max(colsums)
-    print(f"colsums          min,max={mn:.13f} {mx:.13f}")
+    colsums = map_w.T @ area_b  # should equal area_a
+    colsums = colsums / area_a
+    if map_type=='a2o':
+        partial=np.logical_and(ofrac_a>=tol,ofrac_a<=(1-tol))
+        mn_o=np.min(colsums[ofrac_a>(1-tol)])
+        mx_o=np.max(colsums[ofrac_a>(1-tol)])
+        mn_c=np.min(colsums[partial])
+        mx_c=np.max(colsums[partial])
+        print(f"colsums(ocean)   min,max={mn_o:.13f} {mn_o:.13f} tol={tol:.1e}")
+        print(f"colsums(partial) min,max={mn_c:.13f} {mn_c:.13f} tol={tol:.1e}")
+    else:
+        mn=np.min(colsums)
+        mx=np.max(colsums)
+        print(f"colsums          min,max={mn:.13f} {mx:.13f}")
 
 
 #######################################################################
