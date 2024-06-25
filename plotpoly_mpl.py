@@ -39,7 +39,12 @@ def shift_anti_meridian_polygons(lon_poly_coords, lat_poly_coords, eps=40):
     return polygons
 
 
-def plotpoly(xlat,xlon,area,outname):
+def plotpoly(xlat,xlon,data,outname=None, title='',
+              proj=ccrs.PlateCarree(),
+              xlim=(-180.,180), ylim=(-90.,90.),
+              clim=None,colormap=None,mask=1
+):
+
 
     # convert to degrees, if necessary
     if np.max(np.abs(xlat))<1.1*pi:
@@ -47,10 +52,10 @@ def plotpoly(xlat,xlon,area,outname):
         xlon=xlon*180/pi
 
 
-    mn=float(min(area))
-    mx=float(max(area))
+    mn=float(min(data))
+    mx=float(max(data))
     colormap='Spectral'
-    print(f"poly_plot(): plotting {len(area)} cells. data min/max= {mn:.3},{mx:.3}")
+    print(f"poly_plot(): plotting {len(data)} cells. data min/max= {mn:.3},{mx:.3}")
     mn=-.005
     mx=.005
     clev=(mn,mx)
@@ -73,14 +78,14 @@ def plotpoly(xlat,xlon,area,outname):
     fig=matplotlib.pyplot.figure()
     ax = matplotlib.pyplot.axes(projection=proj)
     ax.set_global()
-    p = matplotlib.collections.PolyCollection(corners, array=area, edgecolor='face',linewidth=0.001,alpha=1)
-    #p = matplotlib.collections.PolyCollection(corners, array=area, edgecolor='none',alpha=1)
+    p = matplotlib.collections.PolyCollection(corners, array=data, edgecolor='none',antialiased=False)
     p.set_clim(clev)
     p.set_cmap(colormap)
     ax.add_collection(p)
     fig.colorbar(p)
     
-    matplotlib.pyplot.savefig(outname,dpi=dpi,orientation="portrait",bbox_inches='tight')
+    if outname != None:
+        matplotlib.pyplot.savefig(outname,dpi=dpi,orientation="portrait",bbox_inches='tight')
     end= time.time()
     #print(f"{end-start:.2f}s")
     return 0
