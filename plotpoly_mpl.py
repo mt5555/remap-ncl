@@ -13,35 +13,21 @@ from matplotlib import pyplot
 from matplotlib.collections import PolyCollection
 from math import pi
 
-def shift_anti_meridian_polygons(lon_poly_coords, lat_poly_coords, eps=40):
-    """Shift polygons that are split on the anti-meridian for visualization
-    
-    Parameters
-    ----------
-    lon_poly_coords : ndarray(n, v)
-        longitudinal coordinates of each vertex of each polygon
-    lat_poly_coords : ndarray(n, v)
-        latitudinal coordinates of each vertex of each polygon
-    eps : float (default 10)
-        Tolerance for polygons to shift
-    
-    Returns
-    -------
-    polygons : ndarray(n, v, 2)
-        Combined longitude and latitude coordinates for all polygons (including shifted ones)
-    """
-    polygons = np.stack((lon_poly_coords, lat_poly_coords), axis=2)
+def shift_anti_meridian_polygons(polygons, eps=40):
+    #shift polygons that are split on the anti-meridian for visualization
+
     diff = np.array(np.max(polygons[:,:,0], axis=1) - np.min(polygons[:,:,0], axis=1) > eps)
     lon_coord_mask = polygons[:,:,0] < eps   # all polygons on left edge
     lon_coord_mask[~diff,:] = 0              # mask=0 for subset of left polygons which are not cut
-    #polygons_new=polygons[diff,:,:]            # set of all split polygons
+    polygons_new=polygons[diff,:,:]            # set of all split polygons
     polygons[lon_coord_mask,0] = polygons[lon_coord_mask,0] + 360
 
-    #lon_coord_mask = polygons_new[:,:,0] > eps  # coords on right side
-    #polygons_new[lon_coord_mask,0] = polygons_new[lon_coord_mask,0] - 360
+    lon_coord_mask = polygons_new[:,:,0] > eps  # coords on right side
+    polygons_new[lon_coord_mask,0] = polygons_new[lon_coord_mask,0] - 360
     # also return polygons_new, and "diff", so we can extract
     # data_new = data[diff] 
-    return polygons
+    return [polygons,polygons_new,diff]
+
 
 
 def plotpoly(xlat,xlon,data,outname=None, title='',
@@ -72,20 +58,37 @@ def plotpoly(xlat,xlon,data,outname=None, title='',
         if mn*mx < 0: colormap='Spectral'
         else: colormap='plasma'
 
-    # center plot at lon=0,lat=0:
-    proj=ccrs.PlateCarree()
-    xpoly  = proj.transform_points(proj, xlon, xlat)
-    
+
     #print("matplotlib/polycollection... ",end='')
     dpi=1200
     start= time.time()
-    
-    # adjust cells into polycollection format:
-    xpoly = shift_anti_meridian_polygons(xpoly[:,:,0],xpoly[:,:,1])
-    corners=np.stack([xpoly[:,:,0],xpoly[:,:,1]],axis=2)
-    
-    ax = pyplot.axes(projection=ccrs.PlateCarree())
-    ax.set_global()
+
+    proj=ccrs.Robinson()
+    #proj=ccrs.Orthographic()
+    #print(proj.srs)
+    # transform into desired coordinate system:
+    xpoly  = proj.transform_points(ccrs.PlateCarree(), xlon, xlat)
+
+    # fix and duplicate cut cells
+    if "proj=eqc" in proj.srs:
+        # duplicate cut polygons on left and right edge of plot
+        [xpoly,xpoly_new,mask_new] = shift_anti_meridian_polygons(xpoly)
+        corners=np.concatenate((xpoly[:,:,0:2],xpoly_new[:,:,0:2]),axis=0)
+        data=np.concatenate((data,data[mask_new]),axis=0)
+
+    if "proj=robin" in proj.srs:
+        # remove all cut polygons
+        eps=40*1e5
+        mask_keep = np.array(np.max(xpoly[:,:,0], axis=1) - np.min(xpoly[:,:,0], axis=1) < eps)
+        corners=xpoly[mask_keep,:,0:2]
+        data=data[mask_keep]
+
+    if "proj=ortho" in proj.srs:
+        #remove non-visible points:
+        mask_keep =  np.all(np.isfinite(xpoly),axis=(1,2))
+        corners = xpoly[mask_keep,:,0:2]
+        data=data[mask_keep]
+
     
     fig=matplotlib.pyplot.figure()
     ax = matplotlib.pyplot.axes(projection=proj)
@@ -94,6 +97,7 @@ def plotpoly(xlat,xlon,data,outname=None, title='',
     p.set_clim(clim)
     p.set_cmap(colormap)
     ax.add_collection(p)
+
     fig.colorbar(p)
     
     ax.set_title(title)

@@ -90,9 +90,9 @@ ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor='none')
 xpoly  = proj.transform_points(ccrs.PlateCarree(), grid_corner_lon, grid_corner_lat)
 
 #remove bad polygons:
-if proj == ccrs.PlateCarree():
+if "proj=eqc" in proj.srs:
     transformed_polygons = shift_anti_meridian_polygons(xpoly[:,:,0], xpoly[:,:,1])
-elif proj == ccrs.Robinson():
+elif "proj=robin" in proj.srs:
     transformed_polygons = remove_anti_meridian_polygons(xpoly[:,:,0], xpoly[:,:,1],40*1e5)
 else:
     #remove non-visible points:
