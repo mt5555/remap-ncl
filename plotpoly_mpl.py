@@ -36,6 +36,15 @@ def plotpoly(xlat,xlon,data,outname=None, title='',
               clim=None,colormap=None,mask=1
 ):
 
+    #print("matplotlib/polycollection... ",end='')
+    start= time.time()
+
+    #proj=ccrs.Robinson()
+    #clat=40; clon=-60;  proj = ccrs.Orthographic(central_latitude=clat, central_longitude=clon) 
+    #print(proj.srs)
+
+    dpi=1200
+    
     # if mask present, remove masked cells
     if not np.isscalar(mask):
         data=data[mask]
@@ -53,19 +62,10 @@ def plotpoly(xlat,xlon,data,outname=None, title='',
     print(f"poly_plot(): plotting {len(data)} cells. data min/max= {mn:.3},{mx:.3}")
     if clim == None:
         clim=(mn,mx)
-
     if colormap==None:
         if mn*mx < 0: colormap='Spectral'
         else: colormap='plasma'
-
-
-    #print("matplotlib/polycollection... ",end='')
-    dpi=1200
-    start= time.time()
-
-    proj=ccrs.Robinson()
-    #proj=ccrs.Orthographic()
-    #print(proj.srs)
+    
     # transform into desired coordinate system:
     xpoly  = proj.transform_points(ccrs.PlateCarree(), xlon, xlat)
 
@@ -75,20 +75,17 @@ def plotpoly(xlat,xlon,data,outname=None, title='',
         [xpoly,xpoly_new,mask_new] = shift_anti_meridian_polygons(xpoly)
         corners=np.concatenate((xpoly[:,:,0:2],xpoly_new[:,:,0:2]),axis=0)
         data=np.concatenate((data,data[mask_new]),axis=0)
-
     if "proj=robin" in proj.srs:
         # remove all cut polygons
         eps=40*1e5
         mask_keep = np.array(np.max(xpoly[:,:,0], axis=1) - np.min(xpoly[:,:,0], axis=1) < eps)
         corners=xpoly[mask_keep,:,0:2]
         data=data[mask_keep]
-
     if "proj=ortho" in proj.srs:
         #remove non-visible points:
         mask_keep =  np.all(np.isfinite(xpoly),axis=(1,2))
         corners = xpoly[mask_keep,:,0:2]
         data=data[mask_keep]
-
     
     fig=matplotlib.pyplot.figure()
     ax = matplotlib.pyplot.axes(projection=proj)
@@ -97,7 +94,6 @@ def plotpoly(xlat,xlon,data,outname=None, title='',
     p.set_clim(clim)
     p.set_cmap(colormap)
     ax.add_collection(p)
-
     fig.colorbar(p)
     
     ax.set_title(title)
@@ -106,7 +102,3 @@ def plotpoly(xlat,xlon,data,outname=None, title='',
     end= time.time()
     #print(f"{end-start:.2f}s")
     return 0
-
-
-
-
