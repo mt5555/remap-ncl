@@ -102,7 +102,7 @@ else:
 
 print("adding polycollection") 
 p = matplotlib.collections.PolyCollection(transformed_polygons, facecolor='none',
-                                          edgecolor='black', linewidth=.1,alpha=1)
+      edgecolor='black', linewidth=.1,antialiased=True)
 ax.add_collection(p)
 
 #ax.set_title('grid cells')
