@@ -6,7 +6,8 @@ import os, time, importlib
 from netCDF4 import Dataset
 import numpy as np
 import scipy.sparse as sparse
-from plotpoly_hv import plotpoly
+#from plotpoly_hv import plotpoly
+from plotpoly_mpl import plotpoly
 from test_fields import test_fields
 
 
@@ -268,9 +269,6 @@ else:
 #######################################################################
 # plot grids
 #######################################################################
-if importlib.util.find_spec("holoviews") is  None:
-    print("cant load holoviews module, skipping plots.")
-    os.sys.exit(0)
 
 # grid polygons
 lat_a = mapf.variables['yv_a'][:,:]
@@ -290,5 +288,3 @@ error=data_b_exact-data_b
 plotpoly(lat_b,lon_b,error,"map_error.png",title="Y16_32 map error",clim=clim_error,
 colormap='Spectral',mask=mask_b)
 
-#default colormap is Plasma (i like it better than Viradis)
-#Spectral is a good diverging colrmap. more interesting than RdBu
