@@ -4,6 +4,14 @@
 #
 #
 exepath=~/codes/tempestremap/
+if ! [ -x $exepath/GenerateCSMesh ]; then
+   # might be in our path, via conda:
+   exepath=`which GenerateCSMesh`
+   exepath=`dirname $exepath`
+   echo $exepath
+   echo add some error checking if using this option
+   exit 1
+fi
 wdir=~/scratch1/mapping/grids
 
 
