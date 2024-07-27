@@ -84,6 +84,7 @@ if region=='namerica1_ortho':
     ax = plt.axes(projection=proj)
     ax.set_global()
     ext_oro = ax.get_extent(crs=proj)
+    # using ext_oro without shrinking gives errors for some reason
     new = [ round(x*.85) for x in ext_oro]
     ax.set_extent( new,crs=proj)
 
