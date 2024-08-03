@@ -3,6 +3,10 @@ remap utilities
 a collection of scripts using python, NCO, ncremap and TempestRemap to
 create grids and mapping files
 
+Assumes  tempestremap installed in ~/codes/tempestremap
+./configure --with-netcdf=`nc-config --prefix`  --without-hdf5
+
+
 SCRIP files:
 
 makeSE.sh     make Exodus and SCRIP files for SE grids
