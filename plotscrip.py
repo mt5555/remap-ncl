@@ -67,7 +67,6 @@ if region=='NA1':
     ax.set_extent([lonW, lonE, latS, latN])
 
 if region=='namerica1':
-    # not used - free to change
     proj = ccrs.PlateCarree()
     ax = plt.axes(projection=proj)
     lonW = -150
@@ -75,7 +74,33 @@ if region=='namerica1':
     latS = 0
     latN = 70
     ax.set_extent([lonW, lonE, latS, latN])
+if region=='namerica2':
+    proj = ccrs.PlateCarree()
+    ax = plt.axes(projection=proj)
+    lonW = -127
+    lonE = -112
+    latS = 30
+    latN = 43
+    ax.set_extent([lonW, lonE, latS, latN])
+if region=='namerica3':
+    proj = ccrs.PlateCarree()
+    ax = plt.axes(projection=proj)
+    lonW = -123.5
+    lonE = -120.5
+    latS = 39
+    latN = 36.5
+    ax.set_extent([lonW, lonE, latS, latN])
+if region=='namerica4':
+    proj = ccrs.PlateCarree()
+    ax = plt.axes(projection=proj)
+    lonW = -123.0
+    lonE = -121.0
+    latS = 38.25
+    latN = 37.25
+    ax.set_extent([lonW, lonE, latS, latN])
 
+
+    
 if region=='namerica1_ortho':
     # mountain_x8 grid
     clat=40
