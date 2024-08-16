@@ -54,6 +54,8 @@ fi
 
 map=$wdir/maps/map_${name1}_to_${name2}_$maptype.nc
 map_log=$wdir/maps/map_${name1}_to_${name2}_$maptype.log
+mapt=$wdir/maps/map_${name2}_to_${name1}_${maptype}tr.nc
+mapt_log=$wdir/maps/map_${name2}_to_${name1}_${maptype}tr.log
 
 
 case "$maptype" in
@@ -80,4 +82,18 @@ else
         echo GenerateOfflineMap failed
         exit 1
     fi
+fi
+
+if [ -f $mapt ]; then
+    echo found $mapt
+    echo resusing this file and skippng GenerateOfflineMap
+else
+    echo "GenerateTransposeMap: $maptype"
+    echo "log file: $mapt_log"
+    $exepath/GenerateTransposeMap --in $map --out $mapt >& $mapt_log
+    if [ ! -f $mapt ]; then
+        echo GenerateTransposeMap failed
+        exit 1
+    fi
+
 fi

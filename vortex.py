@@ -10,7 +10,7 @@ from numpy import sin,cos,arctan2,arcsin,cosh,tanh,sqrt
 import scipy as sp
 import scipy.sparse as sparse
 
-from plotpoly_hv import plotpoly
+from plotpoly_mpl import plotpoly
 from test_fields import test_fields
 
 # use scipy instead:
@@ -101,15 +101,15 @@ print("applying mapfile...")
 # print(f"python loop:: {toc - tic:0.4f} seconds")
 
 # fastest.  ne30np4_to_ne1024pg2:  0.42s
-#tic=time.perf_counter()
+tic=time.perf_counter()
 data2 = np.stack( (data_a, np.ones_like(data_a)), axis=1)  # combine into (m,2) matrix
 data_b2 = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a)) @ data2  # need scypi
 data_b=data_b2[:,0]
 mask_b=(data_b2[:,1] != 0)
 
 
-#toc=time.perf_counter()
-#print(f"apply map via sparse.coo_matrix: {toc - tic:0.4f} seconds")
+toc=time.perf_counter()
+print(f"apply map via sparse.coo_matrix: {toc - tic:0.4f} seconds")
 
 
 # # Fast, but not as fast as scypy:   0.61s

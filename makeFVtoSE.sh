@@ -39,9 +39,32 @@ if [ ! -f $overlap ]; then
 fi
 
 
+case "$maptype" in
+    monotr)
+        algarg="--mono --correct_areas" ;;
+    *)
+        echo "bad maptype  $maptype" ;  exit 1 ;;
+esac
+
 map=$wdir/maps/map_${name1}_to_${name2}_$maptype.nc
 map_log=$wdir/maps/map_${name1}_to_${name2}_$maptype.log
 
+if [ -f $map ]; then
+    echo found $map
+    echo resusing this file and skippng GenerateOfflineMap
+else
+    # first SE->FV mono:
+    ./makeSEtoFV mono $name2 $grid2 $name1 $grid1
+    mapmono=$wdir/maps/map_${name2}_to_${name1}_mono.nc
 
-TODO
+
+    echo "GenerateTransposeMap: $maptype"
+    echo "log file: $mapt_log"
+    $exepath/GenerateTransposeMap --in $mapmono --out $map >& $map_log
+    if [ ! -f $map ]; then
+        echo GenerateTransposeMap failed
+        exit 1
+    fi
+
+fi
 
