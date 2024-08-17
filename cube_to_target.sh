@@ -1,10 +1,23 @@
 #!/bin/bash
 #
 #  NCO based replacement for cube-to-target
-#  
+#
+#  Step 0:
+#      use TR or mbtr to create cube3000 -> target_np4 and target_pg2 mapping files
+#      this can take days for cube12000
+#  Step 1:
+#      use this script to interpolate cube3000 to target GLL grid
+#      (just runs ncremap on terr, and then ncap2 to add PHIS=terr*g)
+#  Step 2
+#    apply dycore specific smoothing to PHIS in nctopo_nosmoothing.nc, using homme_tool
+#    this will create nctopo_smoothed.nc file with smoothed PHIS and PHIS_d
+#  Step 3
+#    run this script to compute SGH and SGH30 associated with PHIS
+#    
+#  Uses ncremap and ncap2 since ncremap is about 3x faster than applying a mapfile via 
+#  python/scipy sparse matrix multiply
 #
 #
-exepath=~/codes/tempestremap/
 wdir=~/scratch1/topo
 
 
@@ -29,6 +42,17 @@ topotarg=$3
 
 # STEP1: unsmoothed topo
 if [ "$#" -eq "3" ]; then
+  echo "Running step1: computing unsmoothed topo data on target grid"
+  ncremap -m $mapfile  -v terr,terr_sq  $cube3000 $topotarg
+  ncap2 -A -s 'PHIS=terr*$grav'  $toposmooth $toposmooth
+fi
+
+
+# STEP3: compute SGH for smoothed topo
+# smoothed topo from homme_tool, will have PHIS (pg2 grid)  and PHIS_d (gll grid)
+if [ "$#" -eq "4" ]; then
+  toposmooth=$4
+
   #  check if terr_sq is in the file
   if ! ncdump -h $cube3000 | grep terr_sq ; then
     echo ERROR: variable terr_sq not in source data. You can add it via:
@@ -37,18 +61,6 @@ if [ "$#" -eq "3" ]; then
     echo ncatted -O -v terr_sq -a units,,m,c,"m^2" $cube3000
     exit 1
   fi
-  echo "Running step1: computing unsmoothed topo data on target grid"
-  ncremap -m $mapfile  -v terr,terr_sq  $cube3000 $topotarg
-  # compute SGH = REMAP(terr_c^2) - terr^2
-  ncap2 -A -s 'SGH=terr_sq-terr*terr;PHIS=terr*$grav'  $topotarg $topotarg
-  # todo: will ncremap automatically add lat and lon variables?
-fi
-
-
-# STEP2: compute SGH for smoothed topo
-# smoothed topo from homme_tool, will have PHIS (pg2 grid)  and PHIS_d (gll grid)
-if [ "$#" -eq "4" ]; then
-  toposmooth=$4
 
   # compute SGH = REMAP(terr^2) - terr^2  on PG2 grid
   ncremap -m $mapfile  -v terr_sq,SGH30  $cube3000 temppg2.nc    # create file with terr_sq
