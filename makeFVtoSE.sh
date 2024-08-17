@@ -17,7 +17,7 @@ if [ "$#" -lt "5" ]; then
     echo "To configure: "
     echo makeSEtoFV maptype name1 grad1 name2 grid2
     echo ""
-    echo "maptype = monotr, ... "
+    echo "maptype = mono, ... "
     echo "grid1 = exodus file (default np4)"
     echo "grid2 = FV scrip file"
     echo "name1 = short name of grid1 (e.g. ne30np4)"
@@ -55,16 +55,7 @@ if [ -f $map ]; then
 else
     # first SE->FV mono:
     ./makeSEtoFV mono $name2 $grid2 $name1 $grid1
-    mapmono=$wdir/maps/map_${name2}_to_${name1}_mono.nc
-
-
-    echo "GenerateTransposeMap: $maptype"
-    echo "log file: $mapt_log"
-    $exepath/GenerateTransposeMap --in $mapmono --out $map >& $map_log
-    if [ ! -f $map ]; then
-        echo GenerateTransposeMap failed
-        exit 1
-    fi
-
+    # take tranpose to get monotr map for grid1->grid2
+    ./makeTR mono $name2 $grid2 $name1 $grid1
 fi
 

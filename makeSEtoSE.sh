@@ -84,16 +84,4 @@ else
     fi
 fi
 
-if [ -f $mapt ]; then
-    echo found $mapt
-    echo resusing this file and skippng GenerateOfflineMap
-else
-    echo "GenerateTransposeMap: $maptype"
-    echo "log file: $mapt_log"
-    $exepath/GenerateTransposeMap --in $map --out $mapt >& $mapt_log
-    if [ ! -f $mapt ]; then
-        echo GenerateTransposeMap failed
-        exit 1
-    fi
 
-fi
