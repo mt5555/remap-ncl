@@ -116,11 +116,12 @@ if region=='namerica1_ortho':
 if region=='namerica2_ortho':
     # around west coast for CAne32x* grids
     clat=38
-    clon=-120
+    clon=-122
     proj = ccrs.Orthographic(central_latitude=clat, central_longitude=clon) 
     ax = plt.axes(projection=proj)
     ext_oro = ax.get_extent(crs=proj)
-    new = [ round(x*.35) for x in ext_oro]
+    #new = [ round(x*.35) for x in ext_oro]
+    new = [ round(x*.010) for x in ext_oro]
     ax.set_extent( new,crs=proj)
 
 
