@@ -113,3 +113,12 @@ outname=outname+".png"
 print("saving png:",outname)
 plt.savefig(outname,dpi=1200) 
 
+
+#grid_corner_lon = data.variables['grid_corner_lon'][:]
+#grid_corner_lat = data.variables['grid_corner_lat'][:]
+area  = data.variables['area'][:]
+outname=name.split(".nc")[0]
+outname=outname+"-resolution.png"
+plotpoly(grid_corner_lon,grid_corner_lat,Rearth_km*np.sqrt(area),outname,title="resolution (km)")
+
+
