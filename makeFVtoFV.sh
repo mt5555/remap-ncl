@@ -5,6 +5,10 @@
 #
 # TR maptypes:  mono,bilin, delaunay, intbilin, intbilingb
 #
+# if we get tempest-remap from conda:
+# cd ~/codes/tempestremap
+# ln -s /path/to/conda/Generate* .
+# ln -s /path/to/conda/ConvertMesh* .
 #
 exepath=~/codes/tempestremap
 wdir=~/scratch1/mapping
@@ -30,7 +34,7 @@ grid2=$5
 
 
 if [ ! -x  $exepath/GenerateOfflineMap ]; then
-    echo TR utilties missing
+    echo TR utilties not in path 
     exit 1
 fi
 if [ ! -f $grid1 ]; then

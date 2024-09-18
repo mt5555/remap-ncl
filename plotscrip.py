@@ -57,6 +57,7 @@ if region=='global-robinson':
     ax.set_global()
 
 if region=='NA1':
+    # north atlantic for FLOWMAS grids
     proj = ccrs.PlateCarree()
     ax = plt.axes(projection=proj)
     lonW = -110
@@ -65,11 +66,72 @@ if region=='NA1':
     latN = 70
     ax.set_extent([lonW, lonE, latS, latN])
 
+if region=='namerica1':
+    proj = ccrs.PlateCarree()
+    ax = plt.axes(projection=proj)
+    lonW = -150
+    lonE = -40
+    latS = 0
+    latN = 70
+    ax.set_extent([lonW, lonE, latS, latN])
+if region=='namerica2':
+    proj = ccrs.PlateCarree()
+    ax = plt.axes(projection=proj)
+    lonW = -127
+    lonE = -112
+    latS = 30
+    latN = 43
+    ax.set_extent([lonW, lonE, latS, latN])
+if region=='namerica3':
+    proj = ccrs.PlateCarree()
+    ax = plt.axes(projection=proj)
+    lonW = -123.5
+    lonE = -120.5
+    latS = 39
+    latN = 36.5
+    ax.set_extent([lonW, lonE, latS, latN])
+if region=='namerica4':
+    proj = ccrs.PlateCarree()
+    ax = plt.axes(projection=proj)
+    lonW = -123.0
+    lonE = -121.0
+    latS = 38.25
+    latN = 37.25
+    ax.set_extent([lonW, lonE, latS, latN])
+
+
+    
+if region=='namerica1_ortho':
+    # mountain_x8 grid
+    clat=40
+    clon=-95
+    proj = ccrs.Orthographic(central_latitude=clat, central_longitude=clon) 
+    ax = plt.axes(projection=proj)
+    ax.set_global()
+    ext_oro = ax.get_extent(crs=proj)
+    # using ext_oro without shrinking gives errors for some reason
+    new = [ round(x*.85) for x in ext_oro]
+    ax.set_extent( new,crs=proj)
+
+if region=='namerica2_ortho':
+    # around west coast for CAne32x* grids
+    clat=38
+    clon=-122
+    proj = ccrs.Orthographic(central_latitude=clat, central_longitude=clon) 
+    ax = plt.axes(projection=proj)
+    ext_oro = ax.get_extent(crs=proj)
+    #new = [ round(x*.35) for x in ext_oro]
+    new = [ round(x*.010) for x in ext_oro]
+    ax.set_extent( new,crs=proj)
+
+
+    
 if region=='ortho':
     clat=40
     clon=-60
     proj = ccrs.Orthographic(central_latitude=clat, central_longitude=clon) 
-
+    ax = plt.axes(projection=proj)
+    ax.set_global()
 
 gl=ax.gridlines(linewidth=0.2,alpha=0.5)
 gl.left_labels = True
@@ -99,6 +161,8 @@ else:
     xi =  np.all(np.isfinite(xpoly),axis=(1,2))
     xpoly = xpoly[xi,:,:]
     transformed_polygons = np.stack( (xpoly[:,:,0],xpoly[:,:,1]),axis=2)
+    gl.left_labels = False
+    gl.bottom_labels = False
 
 print("adding polycollection") 
 p = matplotlib.collections.PolyCollection(transformed_polygons, facecolor='none',

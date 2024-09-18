@@ -67,10 +67,12 @@ if [ ! -z $overlap_log ]; then
 
     grid1tmp=$grid1
     grid2tmp=$grid2
+    if [[ $grid2 != *".g" ]]; then
     if python ./isregional.py $grid2; then
         echo "OVERLAP mesh: swapping mesh order"
         grid1tmp=$grid2
         grid2tmp=$grid1
+    fi
     fi
 
     
