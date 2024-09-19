@@ -179,13 +179,17 @@ print("saving png:",outname)
 plt.savefig(outname,dpi=1200) 
 
 
-#grid_corner_lon = data.variables['grid_corner_lon'][:]
-#grid_corner_lat = data.variables['grid_corner_lat'][:]
+print("plotting sqrt area based resolution")
 area  = data.variables['grid_area'][:]
 outname=name.split(".nc")[0]
 outname=outname+"-resolution.png"
 Rearth_km = 6378.1                # radius of earth, in km
-plotpoly(grid_corner_lat,grid_corner_lon,Rearth_km*np.sqrt(area),outname,title="resolution (km)",
-         proj=proj,xlim=(lonW,lonE),ylim=(latS,latN) )
+reskm=Rearth_km*np.sqrt(area)
+plotpoly(grid_corner_lat,grid_corner_lon,reskm,outname,title="resolution (km)")
+
+# used for CA100m grid
+#reskm=np.log10(reskm)
+#plotpoly(grid_corner_lat,grid_corner_lon,reskm,outname,title="resolution (PG2 grid, log10 km)",
+#         proj=proj,xlim=(lonW,lonE),ylim=(latS,latN),clim=(-1.,2) )
 
 

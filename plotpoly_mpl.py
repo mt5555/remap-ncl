@@ -91,12 +91,14 @@ def plotpoly(xlat,xlon,data,outname=None, title='',
     ax = matplotlib.pyplot.axes(projection=proj)
     #ax.set_global()
     ax.set_extent([xlim[0],xlim[1],ylim[0],ylim[1]])
-    
+
     p = matplotlib.collections.PolyCollection(corners, array=data, edgecolor='none',antialiased=False)
     p.set_clim(clim)
     p.set_cmap(colormap)
     ax.add_collection(p)
     fig.colorbar(p)
+
+    ax.coastlines(resolution='50m')
     
     ax.set_title(title)
     if outname != None:
