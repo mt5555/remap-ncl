@@ -5,6 +5,7 @@ import cartopy.crs as ccrs
 import netCDF4 as nc
 import numpy as np
 import sys
+from plotpoly_mpl import plotpoly
 
 if (len(sys.argv)>=2):
     name=sys.argv[1]
@@ -180,9 +181,11 @@ plt.savefig(outname,dpi=1200)
 
 #grid_corner_lon = data.variables['grid_corner_lon'][:]
 #grid_corner_lat = data.variables['grid_corner_lat'][:]
-area  = data.variables['area'][:]
+area  = data.variables['grid_area'][:]
 outname=name.split(".nc")[0]
 outname=outname+"-resolution.png"
-plotpoly(grid_corner_lon,grid_corner_lat,Rearth_km*np.sqrt(area),outname,title="resolution (km)")
+Rearth_km = 6378.1                # radius of earth, in km
+plotpoly(grid_corner_lat,grid_corner_lon,Rearth_km*np.sqrt(area),outname,title="resolution (km)",
+         proj=proj,xlim=(lonW,lonE),ylim=(latS,latN) )
 
 
