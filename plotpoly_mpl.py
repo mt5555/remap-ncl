@@ -36,12 +36,27 @@ def plotpoly(xlat,xlon,data,outname=None, title='',
               clim=None,colormap=None,mask=1
 ):
 
-    #print("matplotlib/polycollection... ",end='')
     start= time.time()
+    fig=matplotlib.pyplot.figure()
 
-    #proj=ccrs.Robinson()
-    #clat=40; clon=-60;  proj = ccrs.Orthographic(central_latitude=clat, central_longitude=clon) 
-    #print(proj.srs)
+    if np.min(xlat)> 0.0 and np.min(xlon)> 200:
+        clat=40; clon=-95;
+        proj = ccrs.Orthographic(central_latitude=clat, central_longitude=clon)
+        #proj = ccrs.LambertConformal(central_latitude=clat, central_longitude=clon)
+        coast_res='110m'  # options: '110m', '50m', '10m'
+        ax = matplotlib.pyplot.axes(projection=proj)
+        ext_oro = ax.get_extent(crs=proj) # soom in
+        new = [ round(x*.65) for x in ext_oro]  # ortho/CONUS
+        #new = [ round(x*.30) for x in ext_oro]   # Lambert / CONUS
+        ax.set_extent( new,crs=proj)
+        print("using proj=orographic over CONUS with coastlines")
+    else:
+        #default
+        ax = matplotlib.pyplot.axes(projection=proj)
+        coast_res=''
+        ax.set_global()
+        #ax.set_extent([-160,-20, -0, 65],crs=proj)
+        #coast_res='110m'  # options: '110m', '50m', '10m'        
 
     dpi=1200
     
@@ -81,18 +96,17 @@ def plotpoly(xlat,xlon,data,outname=None, title='',
         mask_keep = np.array(np.max(xpoly[:,:,0], axis=1) - np.min(xpoly[:,:,0], axis=1) < eps)
         corners=xpoly[mask_keep,:,0:2]
         data=data[mask_keep]
-    if "proj=ortho" in proj.srs:
+    if "proj=ortho" in proj.srs or "proj=lcc" in proj.srs:
         #remove non-visible points:
         mask_keep =  np.all(np.isfinite(xpoly),axis=(1,2))
         corners = xpoly[mask_keep,:,0:2]
         data=data[mask_keep]
     
-    fig=matplotlib.pyplot.figure()
-    ax = matplotlib.pyplot.axes(projection=proj)
-    ax.set_global()
     p = matplotlib.collections.PolyCollection(corners, array=data, edgecolor='none',antialiased=False)
     p.set_clim(clim)
     p.set_cmap(colormap)
+    if (coast_res != ''):
+        ax.coastlines(resolution=coast_res) 
     ax.add_collection(p)
     fig.colorbar(p)
     

@@ -11,7 +11,7 @@ wdir=~/scratch1/mapping
 
 args=("$@")
 if [ "$#" -lt "5" ]; then
-    echo makeSEtoFV maptype name1 grad1 name2 grid2 
+    echo makeSEtoFV maptype name1 grid1 name2 grid2 
     echo ""
     echo "maptype = intbilin, highorder, mono, ..."
     echo "grid1 = exodus file (default np4)"

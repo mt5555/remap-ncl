@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # 
 # read map file, apply to vortex data, compute error
 #
@@ -278,10 +278,10 @@ lon_b = mapf.variables['xv_b'][:,:]
 
 # plot source grid
 if tot_area_a<1.1:
-    plotpoly(lat_a,lon_a,Rearth_km*np.sqrt(area_a),"srcgrid-dx.png",title="resolution (km)",mask=src_mask)
+    plotpoly(lat_a,lon_a,Rearth_km*np.sqrt(area_a),"srcgrid-dx.png",title="cell resolution (km)",mask=src_mask)
 # plot target grid
 if tot_area_b<1.1:
-    plotpoly(lat_b,lon_b,Rearth_km*np.sqrt(area_b),"dstgrid-dx.png",title="resolution (km)",mask=dst_mask)    
+    plotpoly(lat_b,lon_b,Rearth_km*np.sqrt(area_b),"dstgrid-dx.png",title="cell resolution (km)",mask=dst_mask)    
 
 plotpoly(lat_b,lon_b,data_b,"map_field.png",title="mapped Y16_32",mask=mask_b)
 error=data_b_exact-data_b
