@@ -5,6 +5,7 @@ import cartopy.crs as ccrs
 import netCDF4 as nc
 import numpy as np
 import sys
+from plotpoly_mpl import plotpoly
 
 if (len(sys.argv)>=2):
     name=sys.argv[1]
@@ -110,7 +111,8 @@ if region=='namerica1_ortho':
     ax.set_global()
     ext_oro = ax.get_extent(crs=proj)
     # using ext_oro without shrinking gives errors for some reason
-    new = [ round(x*.85) for x in ext_oro]
+    #new = [ round(x*.85) for x in ext_oro]    # max useful region
+    new = [ round(x*.60) for x in ext_oro]     # zoom in
     ax.set_extent( new,crs=proj)
 
 if region=='namerica2_ortho':
@@ -166,7 +168,7 @@ else:
 
 print("adding polycollection") 
 p = matplotlib.collections.PolyCollection(transformed_polygons, facecolor='none',
-      edgecolor='black', linewidth=.1,antialiased=True)
+      edgecolor='black', linewidth=.02,antialiased=True)
 ax.add_collection(p)
 
 #ax.set_title('grid cells')
@@ -175,14 +177,20 @@ ax.add_collection(p)
 outname=name.split(".nc")[0]
 outname=outname+".png"
 print("saving png:",outname)
-plt.savefig(outname,dpi=1200) 
+plt.savefig(outname,dpi=3600) 
 
 
-#grid_corner_lon = data.variables['grid_corner_lon'][:]
-#grid_corner_lat = data.variables['grid_corner_lat'][:]
-area  = data.variables['area'][:]
+print("plotting sqrt area based resolution")
+area  = data.variables['grid_area'][:]
 outname=name.split(".nc")[0]
 outname=outname+"-resolution.png"
-plotpoly(grid_corner_lon,grid_corner_lat,Rearth_km*np.sqrt(area),outname,title="resolution (km)")
+Rearth_km = 6378.1                # radius of earth, in km
+reskm=Rearth_km*np.sqrt(area)
+plotpoly(grid_corner_lat,grid_corner_lon,reskm,outname,title="resolution (km)")
+
+# used for CA100m grid
+#reskm=np.log10(reskm)
+#plotpoly(grid_corner_lat,grid_corner_lon,reskm,outname,title="resolution (PG2 grid, log10 km)",
+#         proj=proj,xlim=(lonW,lonE),ylim=(latS,latN),clim=(-1.,2) )
 
 
