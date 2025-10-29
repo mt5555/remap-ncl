@@ -2,7 +2,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import cartopy
 import cartopy.crs as ccrs
-import netCDF4 as nc
+#import netCDF4 as nc
+import xarray as xr
 import numpy as np
 import sys
 from plotpoly_mpl import plotpoly
@@ -11,7 +12,7 @@ if (len(sys.argv)>=2):
     name=sys.argv[1]
 else:
     name='TEMPEST_ne30pg2.scrip.nc'
-    print("no SCRIP file given. looking for TEMPEST_ne30pg2.scrip.nc")
+    print("no SCRIP or latlon file given. looking for TEMPEST_ne30pg2.scrip.nc")
 if (len(sys.argv)>=3):
     region=sys.argv[2]
 else:
@@ -21,14 +22,35 @@ else:
 
 
 # Load the data from the file
-data = nc.Dataset(name)
+data = xr.open_dataset(name)
 
- 
-# Extract the longitude and latitude arrays
-#grid_center_lon = data.variables['grid_center_lon'][:]
-#grid_center_lat = data.variables['grid_center_lat'][:]
-grid_corner_lon = data.variables['grid_corner_lon'][:]
-grid_corner_lat = data.variables['grid_corner_lat'][:]
+if "grid_corner_lon" in data:
+    # SCRIP file
+    # Extract the longitude and latitude arrays
+    #grid_center_lon = data.variables['grid_center_lon'][:]
+    #grid_center_lat = data.variables['grid_center_lat'][:]
+    grid_corner_lon = data['grid_corner_lon'].values
+    grid_corner_lat = data['grid_corner_lat'].values
+    area  = data['grid_area']
+else:
+    # latlon file
+    lon = data['lon'].values
+    lat = data['lat'].values
+    area  = data['area']
+    #element_corners is 'int', but for some netcdf files, reads as float unless:
+    corners = data['element_corners'].astype(np.int64).values
+
+    nshape=(corners.shape[1],corners.shape[0])
+    grid_corner_lon = np.empty(shape=nshape)
+    grid_corner_lat = np.empty(shape=nshape)
+    
+    print("constructing cells from corner index data...")
+    for i in range(4):
+        grid_corner_lon[:,i]=lon[corners[i,:]-1]
+        grid_corner_lat[:,i]=lat[corners[i,:]-1]
+    
+                        
+    
  
 def shift_anti_meridian_polygons(lon_poly_coords, lat_poly_coords, eps=40):
     polygons = np.stack((lon_poly_coords, lat_poly_coords), axis=2)
@@ -179,14 +201,15 @@ outname=outname+".png"
 print("saving png:",outname)
 plt.savefig(outname,dpi=3600) 
 
-
-print("plotting sqrt area based resolution")
-area  = data.variables['grid_area'][:]
-outname=name.split(".nc")[0]
-outname=outname+"-resolution.png"
-Rearth_km = 6378.1                # radius of earth, in km
-reskm=Rearth_km*np.sqrt(area)
-plotpoly(grid_corner_lat,grid_corner_lon,reskm,outname,title="resolution (km)")
+# for scrip file, polycollection plot colered by resolution
+# latlon file, area is vertex data, cant plot with polycollection
+if "grid_corner_lon" in data:
+    print("plotting sqrt area based resolution")
+    outname=name.split(".nc")[0]
+    outname=outname+"-resolution.png"
+    Rearth_km = 6378.1                # radius of earth, in km
+    reskm=Rearth_km*np.sqrt(area.values)
+    plotpoly(grid_corner_lat,grid_corner_lon,reskm,outname,title="resolution (km)")
 
 # used for CA100m grid
 #reskm=np.log10(reskm)

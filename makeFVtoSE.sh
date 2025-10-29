@@ -15,7 +15,7 @@ wdir=~/scratch1/mapping
 args=("$@")
 if [ "$#" -lt "5" ]; then
     echo "To configure: "
-    echo makeSEtoFV maptype name1 grad1 name2 grid2
+    echo makeFVtoSE maptype name1 grad1 name2 grid2
     echo ""
     echo "maptype = mono, ... "
     echo "grid1 = exodus file (default np4)"

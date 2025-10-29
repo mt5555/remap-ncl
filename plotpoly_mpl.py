@@ -59,7 +59,7 @@ def plotpoly(xlat,xlon,data,outname=None, title='',
         #ax.set_extent([-160,-20, -0, 65],crs=proj)
         #coast_res='110m'  # options: '110m', '50m', '10m'        
 
-    dpi=1200
+    dpi=2400
     
     # if mask present, remove masked cells
     if not np.isscalar(mask):
