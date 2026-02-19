@@ -25,7 +25,8 @@
 #    7.5s    3m59s
 #
 #  conus 1024x4
-#   30s       INT_MAX error
+#   30s      6m24s
+#  7.5s      7m52s
 #
 wdir=/global/cfs/cdirs/e3sm/taylorm/topo              #wdir=~/proj/topo
 grid=/global/cfs/cdirs/e3sm/taylorm/mapping/grids
@@ -33,15 +34,15 @@ mbda=/global/cfs/cdirs/e3sm/software/moab/intel/bin/mbda
 export OMP_NUM_THREADS=128  # 256 is no faster
 
 # source data
-namesrc=USGS30 ; src=$wdir/usgs-rawdata-cdf5.nc  
+#namesrc=USGS30 ; src=$wdir/usgs-rawdata.nc  
 #namesrc=USGS15 ; src=$wdir/usgs-15s-cdf5.nc
-#namesrc=USGS7.5 src=$wdir/usgs-7.5s.nc
+namesrc=USGS7.5 src=$wdir/usgs-7.5s.nc
 
 #nameout=ne16np4 ; targ=$wdir/ne16np4_mbda.nc  
 #nameout=CA100np4 ; targ=$grid/CA100mnp4_homme_latlon.nc
-#nameout=conus1024x2  ;targ=$grid/2025-scream-conus-1024x2-ne0np4_mbda.nc
+nameout=conus1024x2  ;targ=$grid/2025-scream-conus-1024x2-ne0np4_mbda.nc
 #nameout=conus1024x3 ; targ=$grid/2026-incite-conus-1024x3-ne0np4_mbda.nc
-nameout=conus1024x4 ; targ=$grid/2026-incite-conus-1024x4-ne0np4_mbda.nc
+#nameout=conus1024x4 ; targ=$grid/2026-incite-conus-1024x4-ne0np4_mbda.nc
 
 
 
