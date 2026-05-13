@@ -7,6 +7,15 @@ Assumes  tempestremap installed in ~/codes/tempestremap
 ./configure --with-netcdf=`nc-config --prefix`  --without-hdf5
 
 
+Integrated bilinear status:
+"intbilin"   requires target to be FV
+             with SE source, uses "mono3"
+             with FV source, uses fvintbilin
+
+"intbilingb"  only for FV->FV
+
+
+
 SCRIP files:
 
 makeSE.sh     make Exodus and SCRIP files for SE grids

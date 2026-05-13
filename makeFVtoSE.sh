@@ -3,7 +3,8 @@
 #
 # makeFVtoSE.sh maptype name1 grid1 name2 grid2 
 #
-# TR maptypes:  monotr (recommended), mono,  intbilin(new 2022, not tested)
+# TR maptypes:  monotr (recommended), mono,
+#    intbilin(new 2022, not tested - but I think not supported for SE target grids)
 #
 # these maps were needed by V1 when running on np4 grids.
 # not used anymore and this script is not finished
