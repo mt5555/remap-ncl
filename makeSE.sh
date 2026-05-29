@@ -26,6 +26,7 @@ if [ "$#" -ge "2" ]; then
     PG=$2
 fi
 
+set -x # turn on echo
 
 cd $wdir
 if [[ $1 == *".g"* ]]; then
