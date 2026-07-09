@@ -21,19 +21,6 @@ if len(os.sys.argv) < 3:
 map_type=os.sys.argv[1]
 mapfile=os.sys.argv[2]
 
-print("reading map: ",mapfile)
-mapf = Dataset(mapfile,"r")
-S=mapf.variables['S'][:]
-row=mapf.variables['row'][:]
-col=mapf.variables['col'][:]
-row=row-1   # convert to zero indexing
-col=col-1
-n_a = len(mapf['xc_a'])  # removed [:]
-n_b = len(mapf['xc_b'])
-map_w = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a))
-
-area_a = mapf.variables['area_a'][:]
-area_b = mapf.variables['area_b'][:]
 
 
 have_o2a=False
@@ -49,13 +36,44 @@ if len(os.sys.argv) >= 4:
     o2a_n_a = len(fluxf['xc_a'])  # removed [:]
     o2a_n_b = len(fluxf['xc_b'])
     o2a_map_w = sparse.coo_matrix((S, (row,col)), shape=(o2a_n_b,o2a_n_a))
-    fluxf.close()
     have_o2a=True
     # compute oface_a  (ocean frac on atmosphere grid)
     # assumes MPAS grid which only contains ocean cells:
     ofrac_a = o2a_map_w @ np.ones(o2a_n_a)
     # lfrac_a = 1-ofrac_a
 
+
+print("reading map: ",mapfile)
+if map_type=='l2a' and mapfile=="Id":
+    # special case for land/atm on same grid
+    if not have_o2a:
+        print("Error: l2a Id map requires o2a_flux map.")
+        os.sys.exit(1)
+    n_b=n_a
+    S = np.ones(n_a)
+    row = np.arange(n_a)
+    col = np.arange(n_a)
+    map_w = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a))
+    area_a = fluxf.variables['area_b'][:]
+    area_b = area_a
+
+else:
+    mapf = Dataset(mapfile,"r")
+    S=mapf.variables['S'][:]
+    row=mapf.variables['row'][:]
+    col=mapf.variables['col'][:]
+    row=row-1   # convert to zero indexing
+    col=col-1
+    n_a = len(mapf['xc_a'])  # removed [:]
+    n_b = len(mapf['xc_b'])
+    map_w = sparse.coo_matrix((S, (row,col)), shape=(n_b,n_a))
+    area_a = mapf.variables['area_a'][:]
+    area_b = mapf.variables['area_b'][:]
+
+if have_o2a:    
+    fluxf.close()
+
+    
 have_lfrin=False
 if len(os.sys.argv) >= 5:
     domain_lnd=os.sys.argv[4]
@@ -202,6 +220,10 @@ if tot_area_b>1.1:
     print("Error processing area_b, skipping mapping Y16_32 error calculation.")
     os.sys.exit(1)
 
+if mapfile=="Id":
+    print("Id map, skipping map error and grid plots")
+    os.sys.exit(1)
+    
 #######################################################################
 # mapping error
 #######################################################################
