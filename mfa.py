@@ -49,6 +49,7 @@ if map_type=='l2a' and mapfile=="Id":
     if not have_o2a:
         print("Error: l2a Id map requires o2a_flux map.")
         os.sys.exit(1)
+    n_a=o2a_n_b   # for land and atm grid, use atmosphere dimension from o2a_flux map
     n_b=n_a
     S = np.ones(n_a)
     row = np.arange(n_a)
@@ -214,7 +215,17 @@ if map_type[2]=='a':
     zeroset_count = sum(1 for x in (zeroset>0.001) if x) 
     print(f"zeroset-fraction     max={zeroset_err:.13f} ({zeroset_count} cells have err>.001)")
 
-
+    if have_lfrin and map_type[0]=='l':
+        lfrin_a= map_w @ lfrin        
+        frac_tot=ofrac_a + lfrin_a
+        mn=np.min(frac_tot)
+        mx=np.max(frac_tot)
+        print("ofrac_a / lfrin_a consistency. For bigrid, this should be 1 to machine precision")
+        print("for trigrid, errors here can be fixed up to magnitude of the zerooset-fraction error")
+        count_over = np.sum(frac_tot>1.001)
+        count_under= np.sum(frac_tot<.999)
+        print(f"ofrac_a + lfrin     min,max={mn:.13f} {mx:.13f}  ({count_over} cells > 1.001, {count_under} cells < 0.999)")
+        
 
 if tot_area_b>1.1:    
     print("Error processing area_b, skipping mapping Y16_32 error calculation.")
