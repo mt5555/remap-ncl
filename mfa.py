@@ -38,9 +38,13 @@ if len(os.sys.argv) >= 4:
     o2a_map_w = sparse.coo_matrix((S, (row,col)), shape=(o2a_n_b,o2a_n_a))
     have_o2a=True
     # compute oface_a  (ocean frac on atmosphere grid)
-    # assumes MPAS grid which only contains ocean cells:
-    ofrac_a = o2a_map_w @ np.ones(o2a_n_a)
-    # lfrac_a = 1-ofrac_a
+    # assumes MPAS grid which only contains ocean cells: (no longer true, use mask!)
+    #ofrac_a = o2a_map_w @ np.ones(o2a_n_a)
+    mask_o=fluxf.variables['mask_a'][:]
+    ofrac_a = o2a_map_w @ mask_o
+    mn=np.min(mask_o)
+    mx=np.max(mask_o)
+    print(f"ocean mask:  min,max={mn:.13f} {mx:.13f}")
 
 
 print("reading map: ",mapfile)
